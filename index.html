@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>⚔️ 亞丁冒險者公會 ⚔️</title>
+    <title>⚔️ 亞丁冒險者公會：最高管理權限 ⚔️</title>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -11,12 +11,13 @@
             --text-main: #d1ccbc;
             --text-accent: #ffcc00;
             --input-bg: #1a1a1a;
+            --danger-red: #ff4444;
             --gold-gradient: linear-gradient(180deg, #bfa05d 0%, #7a6331 100%);
         }
 
         body { background-color: var(--bg-color); color: var(--text-main); font-family: "Microsoft JhengHei", serif; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; }
-        .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; }
+        .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; position: relative; }
         .forum-header h1 { color: var(--text-accent); margin: 0; text-shadow: 2px 2px 4px #000; }
 
         .page-section { display: none; }
@@ -25,38 +26,43 @@
         .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 20px; font-weight: bold; cursor: pointer; margin-right: 5px; }
         .btn:hover { filter: brightness(1.2); }
         .btn-back { background: #444; color: #fff; margin-bottom: 20px; }
-
-        /* 工具列樣式 */
-        .toolbar { background: #2c2c2c; padding: 8px; border: 1px solid #555; border-bottom: none; display: flex; gap: 10px; }
-        .tool-item { cursor: pointer; font-size: 18px; transition: 0.2s; }
-        .tool-item:hover { transform: scale(1.2); }
+        
+        /* 刪除按鈕：預設隱藏 */
+        .btn-delete { background: var(--danger-red); color: white; border: none; padding: 2px 8px; font-size: 12px; cursor: pointer; margin-left: 10px; border-radius: 3px; display: none; }
+        body.admin-mode .btn-delete { display: inline-block; }
 
         .forum-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border-color); background: #151515; }
         th { background: #2c2c2c; color: var(--border-color); padding: 12px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 15px 12px; border-bottom: 1px solid #333; cursor: pointer; }
-        tr:hover { background-color: #2a2215; }
+        td { padding: 15px 12px; border-bottom: 1px solid #333; }
+        .topic-row:hover { background-color: #2a2215; cursor: pointer; }
 
         .topic-content { background: #222; border: 1px solid #444; padding: 20px; margin-bottom: 20px; }
-        .topic-content img, .reply-box img { max-width: 100%; height: auto; border: 1px solid var(--border-color); margin-top: 10px; display: block; }
-        
         .reply-box { background: #1a1a1a; border-left: 3px solid var(--border-color); padding: 10px 15px; margin-top: 10px; }
         .author { color: #88bcff; font-weight: bold; }
 
-        .post-form { background: #1c1c1c; border: 2px solid var(--border-color); padding: 25px; margin-top: 20px; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 8px; color: var(--border-color); }
-        input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; box-sizing: border-box; }
+        input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; box-sizing: border-box; margin-bottom: 10px; }
         
-        .footer { text-align: center; padding: 40px; color: #555; font-size: 12px; }
+        .footer { text-align: center; padding: 40px; color: #333; font-size: 12px; border-top: 1px solid #222; }
+        .admin-link { color: #222; text-decoration: none; cursor: pointer; }
+        
+        /* 登入視窗樣式 */
+        #admin-modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; 
+        }
+        .modal-content { background: #222; padding: 30px; border: 2px solid var(--border-color); width: 300px; }
     </style>
 </head>
-<body>
+<body id="body-tag">
 
 <div class="container">
     <div class="forum-header">
         <h1>🛡️ 亞丁冒險者公會 🛡️</h1>
+        <div id="admin-status" style="color: #666; font-size: 12px; margin-top: 5px;">當前身份：一般冒險者</div>
+        <button id="logout-btn" class="btn" style="position: absolute; right: 10px; top: 10px; display: none; font-size: 12px; padding: 5px 10px;" onclick="adminLogout()">登出管理員</button>
     </div>
 
+    <!-- 首頁列表 -->
     <div id="home-page" class="page-section active">
         <button class="btn" onclick="showSection('post-page')">⚔️ 發起新的主題</button>
         <table class="forum-table">
@@ -65,142 +71,176 @@
         </table>
     </div>
 
-    <!-- 發佈主題 -->
+    <!-- 管理員登入視窗 -->
+    <div id="admin-modal">
+        <div class="modal-content">
+            <h3 style="color: var(--text-accent); margin-top:0;">管理者驗證</h3>
+            <input type="text" id="login-user" placeholder="管理員帳號">
+            <input type="password" id="login-pass" placeholder="管理員密碼">
+            <div style="display: flex; justify-content: space-between;">
+                <button class="btn" onclick="processLogin()">登入</button>
+                <button class="btn" style="background: #444; color: #fff;" onclick="closeModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查看頁面與發佈頁面 (保持原有邏輯) -->
     <div id="post-page" class="page-section">
         <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
-        <div class="post-form">
-            <h2 style="color: var(--text-accent); margin:0 0 20px 0;">📜 撰寫新的羊皮紙訊息</h2>
-            <div class="input-group"><label>冒險者名稱</label><input type="text" id="post-name"></div>
-            <div class="input-group"><label>主題標題</label><input type="text" id="post-title"></div>
-            <div class="input-group">
-                <label>內容</label>
-                <div class="toolbar">
-                    <span class="tool-item" title="插入表情" onclick="addEmoji('post-content')">😊</span>
-                    <span class="tool-item" title="插入圖片網址" onclick="addImage('post-content')">🖼️</span>
-                </div>
-                <textarea id="post-content" style="height:150px;"></textarea>
-            </div>
+        <div style="background:#1c1c1c; padding:25px; border:2px solid var(--border-color);">
+            <h2>📜 撰寫新的羊皮紙訊息</h2>
+            <input type="text" id="post-name" placeholder="冒險者名稱">
+            <input type="text" id="post-title" placeholder="主題標題">
+            <textarea id="post-content" placeholder="內容..." style="height:150px;"></textarea>
             <button class="btn" onclick="submitPost()">確認發佈</button>
         </div>
     </div>
 
-    <!-- 內容與回覆 -->
     <div id="view-page" class="page-section">
         <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
         <div class="topic-content">
             <h2 id="display-title" style="color: var(--text-accent); margin:0;"></h2>
+            <button class="btn-delete" id="delete-topic-btn">刪除此主題</button>
             <p>發佈者：<span class="author" id="display-author"></span></p>
             <div id="display-content" style="white-space: pre-wrap; margin-top:15px; border-top:1px solid #444; padding-top:15px;"></div>
         </div>
-
         <div id="reply-list"></div>
-
-        <div class="post-form" style="border-style: dashed;">
-            <h3 style="color: var(--text-accent); margin:0 0 15px 0;">💬 發表回覆</h3>
-            <div class="input-group"><label>冒險者名稱</label><input type="text" id="reply-name"></div>
-            <div class="input-group">
-                <label>回覆內容</label>
-                <div class="toolbar">
-                    <span class="tool-item" onclick="addEmoji('reply-content')">😂</span>
-                    <span class="tool-item" onclick="addImage('reply-content')">📷</span>
-                </div>
-                <textarea id="reply-content"></textarea>
-            </div>
+        <div style="background:#1c1c1c; padding:25px; border:1px dashed #555; margin-top:20px;">
+            <h3>💬 發表回覆</h3>
+            <input type="text" id="reply-name" placeholder="名稱">
+            <textarea id="reply-content" placeholder="回覆內容..."></textarea>
             <button class="btn" onclick="submitReply()">送出評論</button>
         </div>
     </div>
 
-    <div class="footer">願殷海薩的祝福與你同在。</div>
+    <div class="footer">
+        願殷海薩的祝福與你同在。 | <span class="admin-link" onclick="openModal()">管理員登入</span>
+    </div>
 </div>
 
 <script>
-    let currentTopicId = null;
-    let topics = JSON.parse(localStorage.getItem('lineage_forum_v2')) || [];
+    let currentTopicIndex = null;
+    let topics = JSON.parse(localStorage.getItem('lineage_forum_v4')) || [];
 
-    // --- 功能函式 ---
+    // --- 管理功能與登入 ---
+    function openModal() { document.getElementById('admin-modal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('admin-modal').style.display = 'none'; }
 
-    function addEmoji(targetId) {
-        const emojis = ['⚔️', '🛡️', '💰', '🐉', '🔥', '🍺', '💀', '👍', '❤️'];
-        const pick = emojis[Math.floor(Math.random() * emojis.length)];
-        document.getElementById(targetId).value += pick;
-    }
+    function processLogin() {
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
 
-    function addImage(targetId) {
-        const url = prompt("請輸入圖片網址 (例如: https://example.com/image.jpg):");
-        if (url) {
-            document.getElementById(targetId).value += `[IMG]${url}[/IMG]`;
+        // 指定的帳號與密碼
+        if (user === "admin" && pass === "1qaz@WSX") {
+            document.getElementById('body-tag').classList.add('admin-mode');
+            document.getElementById('admin-status').innerText = "當前身份：【最高管理者 admin】";
+            document.getElementById('admin-status').style.color = "#ffcc00";
+            document.getElementById('logout-btn').style.display = "block";
+            closeModal();
+            alert("管理者權限已啟動！");
+            renderTopics();
+        } else {
+            alert("密令或帳號錯誤！");
         }
     }
 
-    // 解析內容中的圖片標籤並轉為 HTML
-    function parseContent(text) {
-        return text.replace(/\[IMG\](.*?)\[\/IMG\]/g, '<img src="$1" alt="圖片載入失敗">');
+    function adminLogout() {
+        document.getElementById('body-tag').classList.remove('admin-mode');
+        document.getElementById('admin-status').innerText = "當前身份：一般冒險者";
+        document.getElementById('admin-status').style.color = "#666";
+        document.getElementById('logout-btn').style.display = "none";
+        alert("已從管理模式登出。");
+        renderTopics();
     }
 
-    // --- 核心邏輯 ---
-
+    // --- 資料操作 ---
     function renderTopics() {
         const list = document.getElementById('topic-list');
         list.innerHTML = '';
         topics.forEach((topic, index) => {
             const row = document.createElement('tr');
+            row.className = "topic-row";
             row.onclick = () => viewTopic(index);
-            row.innerHTML = `<td>${topic.title}</td><td class="author">${topic.name}</td>`;
+            row.innerHTML = `
+                <td>
+                    ${topic.title} 
+                    <button class="btn-delete" onclick="deleteTopic(${index}, event)">[刪除]</button>
+                </td>
+                <td class="author">${topic.name}</td>
+            `;
             list.insertBefore(row, list.firstChild);
         });
     }
 
+    function deleteTopic(index, event) {
+        if(event) event.stopPropagation();
+        if(!confirm("確定要刪除這個主題嗎？")) return;
+        topics.splice(index, 1);
+        saveData();
+        showSection('home-page');
+    }
+
+    function deleteReply(replyIndex) {
+        if(!confirm("確定要刪除這條留言嗎？")) return;
+        topics[currentTopicIndex].replies.splice(replyIndex, 1);
+        saveData();
+        renderReplies();
+    }
+
+    // --- 基礎介面功能 ---
     function showSection(id) {
         document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+    }
+
+    function viewTopic(index) {
+        currentTopicIndex = index;
+        const topic = topics[index];
+        document.getElementById('display-title').innerText = topic.title;
+        document.getElementById('display-author').innerText = topic.name;
+        document.getElementById('display-content').innerText = topic.content;
+        document.getElementById('delete-topic-btn').onclick = () => deleteTopic(index);
+        renderReplies();
+        showSection('view-page');
+    }
+
+    function renderReplies() {
+        const list = document.getElementById('reply-list');
+        list.innerHTML = '';
+        topics[currentTopicIndex].replies.forEach((r, i) => {
+            const div = document.createElement('div');
+            div.className = 'reply-box';
+            div.innerHTML = `
+                <div class="author">${r.name} 說： <button class="btn-delete" onclick="deleteReply(${i})">[刪除]</button></div>
+                <div>${r.content}</div>
+            `;
+            list.appendChild(div);
+        });
     }
 
     function submitPost() {
         const name = document.getElementById('post-name').value;
         const title = document.getElementById('post-title').value;
         const content = document.getElementById('post-content').value;
-        if (!name || !title || !content) return alert('內容不能空白！');
-
+        if (!name || !title || !content) return alert('不可空白！');
         topics.push({ name, title, content, replies: [] });
         saveData();
         showSection('home-page');
-        document.getElementById('post-content').value = '';
-    }
-
-    function viewTopic(index) {
-        currentTopicId = index;
-        const topic = topics[index];
-        document.getElementById('display-title').innerText = topic.title;
-        document.getElementById('display-author').innerText = topic.name;
-        document.getElementById('display-content').innerHTML = parseContent(topic.content);
-        renderReplies();
-        showSection('view-page');
-    }
-
-    function renderReplies() {
-        const replyList = document.getElementById('reply-list');
-        replyList.innerHTML = '';
-        topics[currentTopicId].replies.forEach(r => {
-            const div = document.createElement('div');
-            div.className = 'reply-box';
-            div.innerHTML = `<div class="reply-author">${r.name} 說：</div><div>${parseContent(r.content)}</div>`;
-            replyList.appendChild(div);
-        });
+        document.getElementById('post-name').value = ''; document.getElementById('post-title').value = ''; document.getElementById('post-content').value = '';
     }
 
     function submitReply() {
         const name = document.getElementById('reply-name').value;
         const content = document.getElementById('reply-content').value;
-        if (!name || !content) return alert('請填寫完整！');
-
-        topics[currentTopicId].replies.push({ name, content });
+        if (!name || !content) return alert('不可空白！');
+        topics[currentTopicIndex].replies.push({ name, content });
         saveData();
         renderReplies();
-        document.getElementById('reply-content').value = '';
+        document.getElementById('reply-name').value = ''; document.getElementById('reply-content').value = '';
     }
 
     function saveData() {
-        localStorage.setItem('lineage_forum_v2', JSON.stringify(topics));
+        localStorage.setItem('lineage_forum_v4', JSON.stringify(topics));
         renderTopics();
     }
 
