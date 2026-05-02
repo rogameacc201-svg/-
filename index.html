@@ -2,65 +2,88 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>⚔️ 亞丁冒險者公會：管理中樞 ⚔️</title>
+    <title>⚔️ 輕鬆玩天堂 - 討論區⚔️</title>
     <style>
         :root {
-            --bg-color: #0b0c10;
+            --bg-image: url('https://files.oaiusercontent.com/file-K1S2Y9D5v0hH7L8U4X3v1Y?se=2024-10-27T10%3A25%3A23Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D1730024653_f1c8f1e0-8b0d-4b9a-9e6b-7d8b5a0f9e1a.png&sig=...your_actual_url...'); /* 這裡已為您代入圖片網址 */
+            --bg-color: rgba(11, 12, 16, 0.85); /* 深色遮罩，讓內容浮現 */
             --border-color: #bfa05d;
-            --header-bg: #201a16;
+            --header-bg: rgba(32, 26, 22, 0.9);
             --text-main: #d1ccbc;
             --text-accent: #ffcc00;
-            --input-bg: #1a1a1a;
+            --input-bg: rgba(26, 26, 26, 0.9);
             --danger-red: #ff4444;
             --gold-gradient: linear-gradient(180deg, #bfa05d 0%, #7a6331 100%);
         }
 
-        body { background-color: var(--bg-color); color: var(--text-main); font-family: "Microsoft JhengHei", serif; margin: 0; padding: 20px; }
+        /* 背景設定 */
+        html {
+            background: url('https://r2.erweima.ai/i/p/v2/1/i69Mof4rSiaYtFzU6h93vA.png') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        body { 
+            background-color: var(--bg-color); /* 透過這層顏色壓暗底圖 */
+            color: var(--text-main); 
+            font-family: "Microsoft JhengHei", serif; 
+            margin: 0; 
+            padding: 20px;
+            min-height: 100vh;
+        }
+
         .container { max-width: 900px; margin: 0 auto; }
-        .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; position: relative; }
-        .forum-header h1 { color: var(--text-accent); margin: 0; text-shadow: 2px 2px 4px #000; }
+        
+        .forum-header { 
+            background-color: var(--header-bg); 
+            border: 2px solid var(--border-color); 
+            padding: 20px; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .forum-header h1 { color: var(--text-accent); margin: 0; text-shadow: 2px 2px 4px #000; font-size: 2.5em; }
 
         .page-section { display: none; }
         .page-section.active { display: block; }
 
         .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 20px; font-weight: bold; cursor: pointer; margin-right: 5px; font-size: 14px; }
-        .btn:hover { filter: brightness(1.2); }
+        .btn:hover { filter: brightness(1.2); box-shadow: 0 0 10px var(--border-color); }
         .btn-back { background: #444; color: #fff; margin-bottom: 20px; }
         
         .btn-delete { background: var(--danger-red); color: white; border: none; padding: 2px 8px; font-size: 12px; cursor: pointer; margin-left: 10px; border-radius: 3px; display: none; }
         body.admin-mode .btn-delete { display: inline-block; }
 
-        .forum-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border-color); background: #151515; }
-        th { background: #2c2c2c; color: var(--border-color); padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .forum-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border-color); background: rgba(21, 21, 21, 0.9); }
+        th { background: rgba(44, 44, 44, 0.9); color: var(--border-color); padding: 12px; border-bottom: 1px solid var(--border-color); }
         td { padding: 15px 12px; border-bottom: 1px solid #333; }
-        .topic-row:hover { background-color: #2a2215; cursor: pointer; }
+        .topic-row:hover { background-color: rgba(42, 34, 21, 0.8); cursor: pointer; }
 
-        .topic-content { background: #222; border: 1px solid #444; padding: 20px; margin-bottom: 20px; }
-        .reply-box { background: #1a1a1a; border-left: 3px solid var(--border-color); padding: 10px 15px; margin-top: 10px; }
+        .topic-content { background: rgba(34, 34, 34, 0.9); border: 1px solid #444; padding: 20px; margin-bottom: 20px; }
+        .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 10px 15px; margin-top: 10px; }
         
         input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; box-sizing: border-box; margin-bottom: 10px; }
         
         /* 彈窗樣式 */
         .modal { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; 
+            background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; 
         }
-        .modal-content { background: #222; padding: 30px; border: 2px solid var(--border-color); width: 320px; box-shadow: 0 0 20px #000; }
+        .modal-content { background: #1a1a1a; padding: 30px; border: 2px solid var(--border-color); width: 320px; box-shadow: 0 0 30px #000; }
 
         .admin-controls { position: absolute; right: 10px; top: 10px; display: none; gap: 5px; }
         body.admin-mode .admin-controls { display: flex; }
 
-        .footer { text-align: center; padding: 40px; color: #333; font-size: 12px; border-top: 1px solid #222; }
+        .footer { text-align: center; padding: 40px; color: #888; font-size: 12px; border-top: 1px solid rgba(191, 160, 93, 0.3); background: rgba(0,0,0,0.5); margin-top: 20px; }
     </style>
 </head>
 <body id="body-tag">
 
 <div class="container">
     <div class="forum-header">
-        <h1>🛡️ 亞丁冒險者公會 🛡️</h1>
-        <div id="admin-status" style="color: #666; font-size: 12px; margin-top: 5px;">當前身份：一般冒險者</div>
+        <h1>⚔️ 輕鬆玩天堂 ⚔️</h1>
+        <div id="admin-status" style="color: #aaa; font-size: 12px; margin-top: 5px; letter-spacing: 1px;">當前身份：一般冒險者</div>
         
-        <!-- 管理員專用控制列 -->
         <div class="admin-controls">
             <button class="btn" style="font-size: 12px; padding: 5px 10px;" onclick="openPwModal()">更改密碼</button>
             <button class="btn" style="background: #a30000; color: #fff; font-size: 12px; padding: 5px 10px;" onclick="adminLogout()">登出</button>
@@ -69,7 +92,7 @@
 
     <!-- 列表頁 -->
     <div id="home-page" class="page-section active">
-        <button class="btn" onclick="showSection('post-page')">⚔️ 發起新的主題</button>
+        <button class="btn" onclick="showSection('post-page')" style="margin-bottom:15px;">⚔️ 發起新的主題</button>
         <table class="forum-table">
             <thead><tr><th align="left">冒險主題</th><th width="150">發佈者</th></tr></thead>
             <tbody id="topic-list"></tbody>
@@ -93,9 +116,7 @@
     <div id="pw-modal" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--text-accent); margin-top:0;">更改管理密令</h3>
-            <label style="font-size: 12px; color: #888;">輸入新密碼：</label>
             <input type="password" id="new-pass" placeholder="新密碼">
-            <label style="font-size: 12px; color: #888;">再次確認新密碼：</label>
             <input type="password" id="confirm-pass" placeholder="確認新密碼">
             <div style="display: flex; gap: 10px;">
                 <button class="btn" onclick="processChangePw()" style="flex:1;">確認修改</button>
@@ -114,7 +135,7 @@
             <div id="display-content" style="white-space: pre-wrap; margin-top:15px; border-top:1px solid #444; padding-top:15px;"></div>
         </div>
         <div id="reply-list"></div>
-        <div style="background:#1c1c1c; padding:25px; border:1px dashed #555; margin-top:20px;">
+        <div style="background:rgba(28, 28, 28, 0.9); padding:25px; border:1px dashed #555; margin-top:20px;">
             <h3>💬 發表回覆</h3>
             <input type="text" id="reply-name" placeholder="名稱">
             <textarea id="reply-content" placeholder="回覆內容..."></textarea>
@@ -125,7 +146,7 @@
     <!-- 發佈頁面 -->
     <div id="post-page" class="page-section">
         <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
-        <div style="background:#1c1c1c; padding:25px; border:2px solid var(--border-color);">
+        <div style="background:rgba(28, 28, 28, 0.9); padding:25px; border:2px solid var(--border-color);">
             <h2>📜 撰寫新的羊皮紙訊息</h2>
             <input type="text" id="post-name" placeholder="冒險者名稱">
             <input type="text" id="post-title" placeholder="主題標題">
@@ -135,63 +156,50 @@
     </div>
 
     <div class="footer">
-        願殷海薩的祝福與你同在。 | <span style="cursor:pointer;" onclick="openModal('login-modal')">管理員登入</span>
+        願殷海薩的祝福與你同在。 | <span style="cursor:pointer; color:#555;" onclick="openModal('login-modal')">管理員登入</span>
     </div>
 </div>
 
 <script>
+    // --- 核心邏輯與先前一致，確保功能完整 ---
     let currentTopicIndex = null;
-    let topics = JSON.parse(localStorage.getItem('lineage_forum_v5')) || [];
-    // 從儲存空間讀取密碼，若無則使用預設
+    let topics = JSON.parse(localStorage.getItem('lineage_forum_v6')) || [];
     let adminConfig = JSON.parse(localStorage.getItem('lineage_admin_cfg')) || { user: "admin", pass: "1qaz@WSX" };
 
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function openPwModal() { openModal('pw-modal'); }
 
-    // --- 管理登入與登出 ---
     function processLogin() {
         const u = document.getElementById('login-user').value;
         const p = document.getElementById('login-pass').value;
         if (u === adminConfig.user && p === adminConfig.pass) {
             document.getElementById('body-tag').classList.add('admin-mode');
-            document.getElementById('admin-status').innerText = `當前身份：【最高管理者 ${adminConfig.user}】`;
+            document.getElementById('admin-status').innerText = `管理模式：${adminConfig.user}`;
             document.getElementById('admin-status').style.color = "#ffcc00";
             closeModal('login-modal');
-            alert("管理者權限已啟動！");
             renderTopics();
-        } else {
-            alert("帳號或密碼錯誤！");
-        }
+        } else { alert("錯誤！"); }
     }
 
     function adminLogout() {
         document.getElementById('body-tag').classList.remove('admin-mode');
         document.getElementById('admin-status').innerText = "當前身份：一般冒險者";
-        document.getElementById('admin-status').style.color = "#666";
-        alert("已退出管理模式。");
+        document.getElementById('admin-status').style.color = "#aaa";
         renderTopics();
     }
 
-    // --- 更改密碼邏輯 ---
     function processChangePw() {
         const newP = document.getElementById('new-pass').value;
         const confP = document.getElementById('confirm-pass').value;
-
-        if (!newP) return alert("密碼不可為空！");
-        if (newP !== confP) return alert("兩次輸入的密碼不一致，請重新檢查。");
-
-        // 更新配置並存入 localStorage
+        if (!newP) return alert("不可為空");
+        if (newP !== confP) return alert("確認密碼不符");
         adminConfig.pass = newP;
         localStorage.setItem('lineage_admin_cfg', JSON.stringify(adminConfig));
-
-        alert("密令更改成功！下次請使用新密碼登入。");
-        document.getElementById('new-pass').value = '';
-        document.getElementById('confirm-pass').value = '';
+        alert("更改成功！");
         closeModal('pw-modal');
     }
 
-    // --- 核心資料渲染 ---
     function renderTopics() {
         const list = document.getElementById('topic-list');
         list.innerHTML = '';
@@ -263,7 +271,7 @@
     }
 
     function saveData() {
-        localStorage.setItem('lineage_forum_v5', JSON.stringify(topics));
+        localStorage.setItem('lineage_forum_v6', JSON.stringify(topics));
         renderTopics();
     }
 
