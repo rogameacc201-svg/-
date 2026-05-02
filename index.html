@@ -2,11 +2,11 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>⚔️ 輕鬆玩天堂 - 討論區⚔️</title>
+    <title>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</title>
     <style>
         :root {
-            --bg-image: url('bg.png'); /* 這裡已為您代入圖片網址 */
-            --bg-color: rgba(11, 12, 16, 0.85); /* 深色遮罩，讓內容浮現 */
+            /* 這裡已更改為讀取本地檔案 bg.png */
+            --bg-color: rgba(11, 12, 16, 0.85); 
             --border-color: #bfa05d;
             --header-bg: rgba(32, 26, 22, 0.9);
             --text-main: #d1ccbc;
@@ -16,14 +16,15 @@
             --gold-gradient: linear-gradient(180deg, #bfa05d 0%, #7a6331 100%);
         }
 
-        /* 背景設定 */
+        /* 背景設定：讀取同層級的 bg.png */
         html {
-            background: url('https://r2.erweima.ai/i/p/v2/1/i69Mof4rSiaYtFzU6h93vA.png') no-repeat center center fixed;
+            background: url('bg.png') no-repeat center center fixed;
             background-size: cover;
+            background-color: #000; /* 若圖片沒跑出來，至少有黑色底 */
         }
 
         body { 
-            background-color: var(--bg-color); /* 透過這層顏色壓暗底圖 */
+            background-color: var(--bg-color); 
             color: var(--text-main); 
             font-family: "Microsoft JhengHei", serif; 
             margin: 0; 
@@ -64,7 +65,6 @@
         
         input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; box-sizing: border-box; margin-bottom: 10px; }
         
-        /* 彈窗樣式 */
         .modal { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; 
@@ -81,8 +81,8 @@
 
 <div class="container">
     <div class="forum-header">
-        <h1>⚔️ 輕鬆玩天堂 ⚔️</h1>
-        <div id="admin-status" style="color: #aaa; font-size: 12px; margin-top: 5px; letter-spacing: 1px;">當前身份：一般冒險者</div>
+        <h1>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</h1>
+        <div id="admin-status" style="color: #aaa; font-size: 12px; margin-top: 5px; letter-spacing: 1px;">當前身份：你是要衝+9的那個冒險者吧</div>
         
         <div class="admin-controls">
             <button class="btn" style="font-size: 12px; padding: 5px 10px;" onclick="openPwModal()">更改密碼</button>
@@ -147,8 +147,8 @@
     <div id="post-page" class="page-section">
         <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
         <div style="background:rgba(28, 28, 28, 0.9); padding:25px; border:2px solid var(--border-color);">
-            <h2>📜 撰寫新的羊皮紙訊息</h2>
-            <input type="text" id="post-name" placeholder="冒險者名稱">
+            <h2>📜 想要討論什麼就說吧，亂留會被扁</h2>
+            <input type="text" id="post-name" placeholder="留遊戲名稱才會武器衝到+9 +10">
             <input type="text" id="post-title" placeholder="主題標題">
             <textarea id="post-content" placeholder="內容..." style="height:150px;"></textarea>
             <button class="btn" onclick="submitPost()">確認發佈</button>
@@ -161,7 +161,7 @@
 </div>
 
 <script>
-    // --- 核心邏輯與先前一致，確保功能完整 ---
+    // 核心邏輯保持不變
     let currentTopicIndex = null;
     let topics = JSON.parse(localStorage.getItem('lineage_forum_v6')) || [];
     let adminConfig = JSON.parse(localStorage.getItem('lineage_admin_cfg')) || { user: "admin", pass: "1qaz@WSX" };
