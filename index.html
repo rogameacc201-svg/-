@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>⚔️ 輕鬆玩天堂：雲端管理中樞 ⚔️</title>
+    <title>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</title>
     <!-- 引入 Firebase SDK (版本 9+) -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -61,7 +61,8 @@
         .content-img { max-width: 100%; height: auto; margin-top: 10px; display: block; border: 1px solid #555; }
 
         input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; box-sizing: border-box; margin-bottom: 10px; }
-        .file-input { margin-bottom: 15px; color: #aaa; font-size: 13px; }
+        .file-input-info { margin-bottom: 15px; color: #aaa; font-size: 13px; }
+        .size-warning { color: var(--danger-red); font-weight: bold; display: none; margin-top: 5px; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a1a; padding: 30px; border: 2px solid var(--border-color); width: 320px; box-shadow: 0 0 30px #000; }
@@ -76,27 +77,27 @@
 
 <div class="container">
     <div class="forum-header">
-        <h1>⚔️ 輕鬆玩天堂 ⚔️</h1>
-        <div id="admin-status" style="color: #aaa; font-size: 12px; margin-top: 5px; letter-spacing: 1px;">當前身份：一般冒險者</div>
+        <h1>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</h1>
+        <div id="admin-status" style="color: #aaa; font-size: 12px; margin-top: 5px; letter-spacing: 1px;">當前身份：你是那個要衝+9 +10的冒險這吧</div>
         <div class="admin-controls">
-            <button class="btn" style="background: #a30000; color: #fff; font-size: 12px; padding: 5px 10px;" onclick="adminLogout()">🚪 登出</button>
+            <button class="btn" style="background: #a30000; color: #fff; font-size: 12px; padding: 5px 10px;" onclick="adminLogout()">🚪 登出系統</button>
         </div>
     </div>
 
     <!-- 列表頁 -->
     <div id="home-page" class="page-section active">
-        <button class="btn" onclick="showSection('post-page')" style="margin-bottom:15px;">⚔️ 發起新的主題</button>
+        <button class="btn" onclick="showSection('post-page')" style="margin-bottom:15px;">⚔️ 撰寫冒險筆記</button>
         <table class="forum-table">
-            <thead><tr><th align="left">📜 冒險主題</th><th width="150">👤 發佈者</th></tr></thead>
+            <thead><tr><th align="left">📜 冒險主題</th><th width="150">👤 冒險者</th></tr></thead>
             <tbody id="topic-list"></tbody>
         </table>
     </div>
 
-    <!-- 登入彈窗 -->
+    <!-- 管理者登入彈窗 -->
     <div id="login-modal" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--text-accent); margin-top:0;">🛡️ 管理者驗證</h3>
-            <input type="password" id="login-pass" placeholder="管理員密令">
+            <input type="password" id="login-pass" placeholder="請輸入管理密令">
             <div style="display: flex; gap: 10px;">
                 <button class="btn" onclick="processLogin()" style="flex:1;">登入</button>
                 <button class="btn" style="background: #444; color: #fff; flex:1;" onclick="closeModal('login-modal')">取消</button>
@@ -106,32 +107,32 @@
 
     <!-- 主題內容頁 -->
     <div id="view-page" class="page-section">
-        <button class="btn btn-back" onclick="showSection('home-page')">⬅️ 返回列表</button>
+        <button class="btn btn-back" onclick="showSection('home-page')">⬅️ 返回村莊</button>
         <div class="topic-content">
             <h2 id="display-title" style="color: var(--text-accent); margin:0;"></h2>
-            <button class="btn-delete" id="delete-topic-btn">🗑️ 刪除此主題</button>
-            <p>發佈者：<span style="color:#88bcff; font-weight:bold;" id="display-author"></span></p>
+            <button class="btn-delete" id="delete-topic-btn">🗑️ 焚毀此紀錄</button>
+            <p>紀錄者：<span style="color:#88bcff; font-weight:bold;" id="display-author"></span></p>
             <div id="display-content" style="white-space: pre-wrap; margin-top:15px; border-top:1px solid #444; padding-top:15px;"></div>
         </div>
         <div id="reply-list"></div>
         <div style="background:rgba(28, 28, 28, 0.9); padding:25px; border:1px dashed #555; margin-top:20px;">
-            <h3>💬 發表回覆</h3>
-            <input type="text" id="reply-name" placeholder="冒險者稱呼">
+            <h3>💬 留言回覆</h3>
+            <input type="text" id="reply-name" placeholder="留遊戲名稱才會武器+9 +10">
             <textarea id="reply-content" placeholder="內容..."></textarea>
-            <div class="file-input">📎 附帶圖片：<input type="file" id="reply-file" accept="image/*"></div>
-            <button class="btn" onclick="submitReply()">🏹 送出評論</button>
+            <div class="file-input-info">📎 附帶圖像 (限制 500KB)：<input type="file" id="reply-file" accept="image/*"></div>
+            <button class="btn" onclick="submitReply()">🏹 傳送訊息</button>
         </div>
     </div>
 
     <!-- 發佈頁面 -->
     <div id="post-page" class="page-section">
-        <button class="btn btn-back" onclick="showSection('home-page')">⬅️ 返回列表</button>
+        <button class="btn btn-back" onclick="showSection('home-page')">⬅️ 取消撰寫</button>
         <div style="background:rgba(28, 28, 28, 0.9); padding:25px; border:2px solid var(--border-color);">
-            <h2>📜 撰寫新的羊皮紙訊息</h2>
-            <input type="text" id="post-name" placeholder="冒險者名稱">
+            <h2>📜 想想看要留什麼來討論</h2>
+            <input type="text" id="post-name" placeholder="留遊戲名稱才會武器+9 +10">
             <input type="text" id="post-title" placeholder="主題標題">
             <textarea id="post-content" placeholder="內容 (文字或圖片網址)..." style="height:150px;"></textarea>
-            <div class="file-input">📎 附帶圖片：<input type="file" id="post-file" accept="image/*"></div>
+            <div class="file-input-info">📎 附帶圖像 (限制 500KB)：<input type="file" id="post-file" accept="image/*"></div>
             <button class="btn" onclick="submitPost()">✅ 確認發佈</button>
         </div>
     </div>
@@ -142,7 +143,7 @@
 </div>
 
 <script>
-    // --- 1. Firebase 配置 (請填入你自己的資訊) ---
+    // --- 1. Firebase 配置 (請自行填入) ---
     const firebaseConfig = {
   apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
   authDomain: "game1-7c85c.firebaseapp.com",
@@ -154,24 +155,21 @@
   measurementId: "G-4P46QECVZX"
 };
 
-    // 初始化 Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const topicsRef = db.ref('topics');
 
-    let topicsData = {}; // 存放雲端抓下來的資料
+    let topicsData = {};
     let currentTopicId = null;
-    const ADMIN_PASS = "1qaz@WSX"; // 固定管理密碼
+    const ADMIN_PASS = "1qaz@WSX";
+    const MAX_FILE_SIZE = 500 * 1024; // 500KB 限制
 
     // --- 2. 核心邏輯 ---
 
-    // 監聽雲端資料變化 (實時同步)
     topicsRef.on('value', (snapshot) => {
         topicsData = snapshot.val() || {};
         renderTopics();
-        if (currentTopicId) {
-            viewTopic(currentTopicId); // 如果正在看某篇，同步刷新內容
-        }
+        if (currentTopicId) viewTopic(currentTopicId);
     });
 
     function formatContent(text, attachedImg) {
@@ -183,6 +181,11 @@
 
     async function fileToBase64(file) {
         if (!file) return null;
+        // 檔案大小檢查
+        if (file.size > MAX_FILE_SIZE) {
+            alert(`⛔ 檔案太大了！目前大小：${Math.round(file.size/1024)}KB，最高限制：500KB`);
+            return "ERROR_SIZE";
+        }
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -193,7 +196,6 @@
     function renderTopics() {
         const list = document.getElementById('topic-list');
         list.innerHTML = '';
-        // 將物件轉為陣列並排序（新的在前）
         const keys = Object.keys(topicsData).reverse();
         keys.forEach(id => {
             const topic = topicsData[id];
@@ -215,7 +217,6 @@
         document.getElementById('display-content').innerHTML = formatContent(t.content, t.image);
         document.getElementById('delete-topic-btn').onclick = () => deleteTopic(id);
         
-        // 渲染回覆
         const replyList = document.getElementById('reply-list');
         replyList.innerHTML = '';
         if (t.replies) {
@@ -234,12 +235,12 @@
         const n = document.getElementById('post-name').value;
         const t = document.getElementById('post-title').value;
         const c = document.getElementById('post-content').value;
-        const file = document.getElementById('post-file').files[0];
+        const fileInput = document.getElementById('post-file');
         if(!n || !t || !c) return alert("請填寫完整");
 
-        const base64Img = await fileToBase64(file);
+        const base64Img = await fileToBase64(fileInput.files[0]);
+        if (base64Img === "ERROR_SIZE") return; // 檔案太大，中斷發文
         
-        // 推送到 Firebase
         topicsRef.push({
             name: n, title: t, content: c, image: base64Img,
             timestamp: Date.now()
@@ -247,27 +248,29 @@
 
         showSection('home-page');
         document.getElementById('post-name').value = ''; document.getElementById('post-title').value = ''; 
-        document.getElementById('post-content').value = ''; document.getElementById('post-file').value = '';
+        document.getElementById('post-content').value = ''; fileInput.value = '';
     }
 
     async function submitReply() {
         const n = document.getElementById('reply-name').value;
         const c = document.getElementById('reply-content').value;
-        const file = document.getElementById('reply-file').files[0];
+        const fileInput = document.getElementById('reply-file');
         if(!n || !c) return alert("不可為空");
 
-        const base64Img = await fileToBase64(file);
+        const base64Img = await fileToBase64(fileInput.files[0]);
+        if (base64Img === "ERROR_SIZE") return;
+
         db.ref(`topics/${currentTopicId}/replies`).push({
             name: n, content: c, image: base64Img, timestamp: Date.now()
         });
 
         document.getElementById('reply-name').value = ''; document.getElementById('reply-content').value = ''; 
-        document.getElementById('reply-file').value = '';
+        fileInput.value = '';
     }
 
     function deleteTopic(id, event) {
         if(event) event.stopPropagation();
-        if(!confirm("確定要刪除嗎？")) return;
+        if(!confirm("確定要焚毀此紀錄嗎？")) return;
         db.ref(`topics/${id}`).remove();
         showSection('home-page');
     }
@@ -277,7 +280,6 @@
         db.ref(`topics/${tId}/replies/${rId}`).remove();
     }
 
-    // --- 管理功能 ---
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function processLogin() {
