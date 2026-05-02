@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>⚔️ 亞丁冒險者公會：最高管理權限 ⚔️</title>
+    <title>⚔️ 亞丁冒險者公會：管理中樞 ⚔️</title>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -23,11 +23,10 @@
         .page-section { display: none; }
         .page-section.active { display: block; }
 
-        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 20px; font-weight: bold; cursor: pointer; margin-right: 5px; }
+        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 20px; font-weight: bold; cursor: pointer; margin-right: 5px; font-size: 14px; }
         .btn:hover { filter: brightness(1.2); }
         .btn-back { background: #444; color: #fff; margin-bottom: 20px; }
         
-        /* 刪除按鈕：預設隱藏 */
         .btn-delete { background: var(--danger-red); color: white; border: none; padding: 2px 8px; font-size: 12px; cursor: pointer; margin-left: 10px; border-radius: 3px; display: none; }
         body.admin-mode .btn-delete { display: inline-block; }
 
@@ -38,19 +37,20 @@
 
         .topic-content { background: #222; border: 1px solid #444; padding: 20px; margin-bottom: 20px; }
         .reply-box { background: #1a1a1a; border-left: 3px solid var(--border-color); padding: 10px 15px; margin-top: 10px; }
-        .author { color: #88bcff; font-weight: bold; }
-
+        
         input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; box-sizing: border-box; margin-bottom: 10px; }
         
-        .footer { text-align: center; padding: 40px; color: #333; font-size: 12px; border-top: 1px solid #222; }
-        .admin-link { color: #222; text-decoration: none; cursor: pointer; }
-        
-        /* 登入視窗樣式 */
-        #admin-modal { 
+        /* 彈窗樣式 */
+        .modal { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; 
+            background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; 
         }
-        .modal-content { background: #222; padding: 30px; border: 2px solid var(--border-color); width: 300px; }
+        .modal-content { background: #222; padding: 30px; border: 2px solid var(--border-color); width: 320px; box-shadow: 0 0 20px #000; }
+
+        .admin-controls { position: absolute; right: 10px; top: 10px; display: none; gap: 5px; }
+        body.admin-mode .admin-controls { display: flex; }
+
+        .footer { text-align: center; padding: 40px; color: #333; font-size: 12px; border-top: 1px solid #222; }
     </style>
 </head>
 <body id="body-tag">
@@ -59,10 +59,15 @@
     <div class="forum-header">
         <h1>🛡️ 亞丁冒險者公會 🛡️</h1>
         <div id="admin-status" style="color: #666; font-size: 12px; margin-top: 5px;">當前身份：一般冒險者</div>
-        <button id="logout-btn" class="btn" style="position: absolute; right: 10px; top: 10px; display: none; font-size: 12px; padding: 5px 10px;" onclick="adminLogout()">登出管理員</button>
+        
+        <!-- 管理員專用控制列 -->
+        <div class="admin-controls">
+            <button class="btn" style="font-size: 12px; padding: 5px 10px;" onclick="openPwModal()">更改密碼</button>
+            <button class="btn" style="background: #a30000; color: #fff; font-size: 12px; padding: 5px 10px;" onclick="adminLogout()">登出</button>
+        </div>
     </div>
 
-    <!-- 首頁列表 -->
+    <!-- 列表頁 -->
     <div id="home-page" class="page-section active">
         <button class="btn" onclick="showSection('post-page')">⚔️ 發起新的主題</button>
         <table class="forum-table">
@@ -71,37 +76,41 @@
         </table>
     </div>
 
-    <!-- 管理員登入視窗 -->
-    <div id="admin-modal">
+    <!-- 登入彈窗 -->
+    <div id="login-modal" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--text-accent); margin-top:0;">管理者驗證</h3>
             <input type="text" id="login-user" placeholder="管理員帳號">
             <input type="password" id="login-pass" placeholder="管理員密碼">
-            <div style="display: flex; justify-content: space-between;">
-                <button class="btn" onclick="processLogin()">登入</button>
-                <button class="btn" style="background: #444; color: #fff;" onclick="closeModal()">取消</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" onclick="processLogin()" style="flex:1;">登入</button>
+                <button class="btn" style="background: #444; color: #fff; flex:1;" onclick="closeModal('login-modal')">取消</button>
             </div>
         </div>
     </div>
 
-    <!-- 查看頁面與發佈頁面 (保持原有邏輯) -->
-    <div id="post-page" class="page-section">
-        <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
-        <div style="background:#1c1c1c; padding:25px; border:2px solid var(--border-color);">
-            <h2>📜 撰寫新的羊皮紙訊息</h2>
-            <input type="text" id="post-name" placeholder="冒險者名稱">
-            <input type="text" id="post-title" placeholder="主題標題">
-            <textarea id="post-content" placeholder="內容..." style="height:150px;"></textarea>
-            <button class="btn" onclick="submitPost()">確認發佈</button>
+    <!-- 更改密碼彈窗 -->
+    <div id="pw-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: var(--text-accent); margin-top:0;">更改管理密令</h3>
+            <label style="font-size: 12px; color: #888;">輸入新密碼：</label>
+            <input type="password" id="new-pass" placeholder="新密碼">
+            <label style="font-size: 12px; color: #888;">再次確認新密碼：</label>
+            <input type="password" id="confirm-pass" placeholder="確認新密碼">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" onclick="processChangePw()" style="flex:1;">確認修改</button>
+                <button class="btn" style="background: #444; color: #fff; flex:1;" onclick="closeModal('pw-modal')">取消</button>
+            </div>
         </div>
     </div>
 
+    <!-- 主題內容頁 -->
     <div id="view-page" class="page-section">
         <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
         <div class="topic-content">
             <h2 id="display-title" style="color: var(--text-accent); margin:0;"></h2>
             <button class="btn-delete" id="delete-topic-btn">刪除此主題</button>
-            <p>發佈者：<span class="author" id="display-author"></span></p>
+            <p>發佈者：<span style="color:#88bcff; font-weight:bold;" id="display-author"></span></p>
             <div id="display-content" style="white-space: pre-wrap; margin-top:15px; border-top:1px solid #444; padding-top:15px;"></div>
         </div>
         <div id="reply-list"></div>
@@ -113,34 +122,46 @@
         </div>
     </div>
 
+    <!-- 發佈頁面 -->
+    <div id="post-page" class="page-section">
+        <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
+        <div style="background:#1c1c1c; padding:25px; border:2px solid var(--border-color);">
+            <h2>📜 撰寫新的羊皮紙訊息</h2>
+            <input type="text" id="post-name" placeholder="冒險者名稱">
+            <input type="text" id="post-title" placeholder="主題標題">
+            <textarea id="post-content" placeholder="內容..." style="height:150px;"></textarea>
+            <button class="btn" onclick="submitPost()">確認發佈</button>
+        </div>
+    </div>
+
     <div class="footer">
-        願殷海薩的祝福與你同在。 | <span class="admin-link" onclick="openModal()">管理員登入</span>
+        願殷海薩的祝福與你同在。 | <span style="cursor:pointer;" onclick="openModal('login-modal')">管理員登入</span>
     </div>
 </div>
 
 <script>
     let currentTopicIndex = null;
-    let topics = JSON.parse(localStorage.getItem('lineage_forum_v4')) || [];
+    let topics = JSON.parse(localStorage.getItem('lineage_forum_v5')) || [];
+    // 從儲存空間讀取密碼，若無則使用預設
+    let adminConfig = JSON.parse(localStorage.getItem('lineage_admin_cfg')) || { user: "admin", pass: "1qaz@WSX" };
 
-    // --- 管理功能與登入 ---
-    function openModal() { document.getElementById('admin-modal').style.display = 'flex'; }
-    function closeModal() { document.getElementById('admin-modal').style.display = 'none'; }
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function openPwModal() { openModal('pw-modal'); }
 
+    // --- 管理登入與登出 ---
     function processLogin() {
-        const user = document.getElementById('login-user').value;
-        const pass = document.getElementById('login-pass').value;
-
-        // 指定的帳號與密碼
-        if (user === "admin" && pass === "1qaz@WSX") {
+        const u = document.getElementById('login-user').value;
+        const p = document.getElementById('login-pass').value;
+        if (u === adminConfig.user && p === adminConfig.pass) {
             document.getElementById('body-tag').classList.add('admin-mode');
-            document.getElementById('admin-status').innerText = "當前身份：【最高管理者 admin】";
+            document.getElementById('admin-status').innerText = `當前身份：【最高管理者 ${adminConfig.user}】`;
             document.getElementById('admin-status').style.color = "#ffcc00";
-            document.getElementById('logout-btn').style.display = "block";
-            closeModal();
+            closeModal('login-modal');
             alert("管理者權限已啟動！");
             renderTopics();
         } else {
-            alert("密令或帳號錯誤！");
+            alert("帳號或密碼錯誤！");
         }
     }
 
@@ -148,12 +169,29 @@
         document.getElementById('body-tag').classList.remove('admin-mode');
         document.getElementById('admin-status').innerText = "當前身份：一般冒險者";
         document.getElementById('admin-status').style.color = "#666";
-        document.getElementById('logout-btn').style.display = "none";
-        alert("已從管理模式登出。");
+        alert("已退出管理模式。");
         renderTopics();
     }
 
-    // --- 資料操作 ---
+    // --- 更改密碼邏輯 ---
+    function processChangePw() {
+        const newP = document.getElementById('new-pass').value;
+        const confP = document.getElementById('confirm-pass').value;
+
+        if (!newP) return alert("密碼不可為空！");
+        if (newP !== confP) return alert("兩次輸入的密碼不一致，請重新檢查。");
+
+        // 更新配置並存入 localStorage
+        adminConfig.pass = newP;
+        localStorage.setItem('lineage_admin_cfg', JSON.stringify(adminConfig));
+
+        alert("密令更改成功！下次請使用新密碼登入。");
+        document.getElementById('new-pass').value = '';
+        document.getElementById('confirm-pass').value = '';
+        closeModal('pw-modal');
+    }
+
+    // --- 核心資料渲染 ---
     function renderTopics() {
         const list = document.getElementById('topic-list');
         list.innerHTML = '';
@@ -161,44 +199,25 @@
             const row = document.createElement('tr');
             row.className = "topic-row";
             row.onclick = () => viewTopic(index);
-            row.innerHTML = `
-                <td>
-                    ${topic.title} 
-                    <button class="btn-delete" onclick="deleteTopic(${index}, event)">[刪除]</button>
-                </td>
-                <td class="author">${topic.name}</td>
-            `;
+            row.innerHTML = `<td>${topic.title} <button class="btn-delete" onclick="deleteTopic(${index}, event)">[刪除]</button></td><td style="color:#88bcff; font-weight:bold;">${topic.name}</td>`;
             list.insertBefore(row, list.firstChild);
         });
     }
 
     function deleteTopic(index, event) {
         if(event) event.stopPropagation();
-        if(!confirm("確定要刪除這個主題嗎？")) return;
+        if(!confirm("確定要刪除嗎？")) return;
         topics.splice(index, 1);
         saveData();
         showSection('home-page');
     }
 
-    function deleteReply(replyIndex) {
-        if(!confirm("確定要刪除這條留言嗎？")) return;
-        topics[currentTopicIndex].replies.splice(replyIndex, 1);
-        saveData();
-        renderReplies();
-    }
-
-    // --- 基礎介面功能 ---
-    function showSection(id) {
-        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
     function viewTopic(index) {
         currentTopicIndex = index;
-        const topic = topics[index];
-        document.getElementById('display-title').innerText = topic.title;
-        document.getElementById('display-author').innerText = topic.name;
-        document.getElementById('display-content').innerText = topic.content;
+        const t = topics[index];
+        document.getElementById('display-title').innerText = t.title;
+        document.getElementById('display-author').innerText = t.name;
+        document.getElementById('display-content').innerText = t.content;
         document.getElementById('delete-topic-btn').onclick = () => deleteTopic(index);
         renderReplies();
         showSection('view-page');
@@ -210,38 +229,48 @@
         topics[currentTopicIndex].replies.forEach((r, i) => {
             const div = document.createElement('div');
             div.className = 'reply-box';
-            div.innerHTML = `
-                <div class="author">${r.name} 說： <button class="btn-delete" onclick="deleteReply(${i})">[刪除]</button></div>
-                <div>${r.content}</div>
-            `;
+            div.innerHTML = `<div style="font-size:12px; color:#bfa05d; margin-bottom:5px;">${r.name} 說：<button class="btn-delete" onclick="deleteReply(${i})">[刪除]</button></div><div>${r.content}</div>`;
             list.appendChild(div);
         });
     }
 
+    function deleteReply(i) {
+        if(!confirm("刪除回覆？")) return;
+        topics[currentTopicIndex].replies.splice(i, 1);
+        saveData();
+        renderReplies();
+    }
+
     function submitPost() {
-        const name = document.getElementById('post-name').value;
-        const title = document.getElementById('post-title').value;
-        const content = document.getElementById('post-content').value;
-        if (!name || !title || !content) return alert('不可空白！');
-        topics.push({ name, title, content, replies: [] });
+        const n = document.getElementById('post-name').value;
+        const t = document.getElementById('post-title').value;
+        const c = document.getElementById('post-content').value;
+        if(!n || !t || !c) return alert("請填寫完整");
+        topics.push({ name: n, title: t, content: c, replies: [] });
         saveData();
         showSection('home-page');
         document.getElementById('post-name').value = ''; document.getElementById('post-title').value = ''; document.getElementById('post-content').value = '';
     }
 
     function submitReply() {
-        const name = document.getElementById('reply-name').value;
-        const content = document.getElementById('reply-content').value;
-        if (!name || !content) return alert('不可空白！');
-        topics[currentTopicIndex].replies.push({ name, content });
+        const n = document.getElementById('reply-name').value;
+        const c = document.getElementById('reply-content').value;
+        if(!n || !c) return alert("不可為空");
+        topics[currentTopicIndex].replies.push({ name: n, content: c });
         saveData();
         renderReplies();
         document.getElementById('reply-name').value = ''; document.getElementById('reply-content').value = '';
     }
 
     function saveData() {
-        localStorage.setItem('lineage_forum_v4', JSON.stringify(topics));
+        localStorage.setItem('lineage_forum_v5', JSON.stringify(topics));
         renderTopics();
+    }
+
+    function showSection(id) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        window.scrollTo(0,0);
     }
 
     renderTopics();
