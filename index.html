@@ -2,16 +2,16 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</title>
-    <!-- 引入 Firebase SDK (版本 9+) -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     
     <style>
         :root {
-            --bg-color: rgba(11, 12, 16, 0.85); 
+            --bg-color: rgba(11, 12, 16, 0.9); 
             --border-color: #bfa05d;
-            --header-bg: rgba(32, 26, 22, 0.9);
+            --header-bg: rgba(32, 26, 22, 0.95);
             --text-main: #d1ccbc;
             --text-accent: #ffcc00;
             --input-bg: rgba(26, 26, 26, 0.9);
@@ -19,6 +19,7 @@
             --gold-gradient: linear-gradient(180deg, #bfa05d 0%, #7a6331 100%);
         }
 
+        /* 背景與基本設定 */
         html {
             background: url('bg.png') no-repeat center center fixed;
             background-size: cover;
@@ -28,132 +29,141 @@
         body { 
             background-color: var(--bg-color); 
             color: var(--text-main); 
-            font-family: "Microsoft JhengHei", serif; 
-            margin: 0; padding: 20px; min-height: 100vh;
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif; 
+            margin: 0; padding: 10px; min-height: 100vh;
         }
 
         .container { max-width: 900px; margin: 0 auto; }
+
+        /* 標題區塊 */
         .forum-header { 
-            background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; 
-            text-align: center; margin-bottom: 20px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            background-color: var(--header-bg); border: 2px solid var(--border-color); 
+            padding: 20px 10px; text-align: center; margin-bottom: 20px; 
+            position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
-        .forum-header h1 { color: var(--text-accent); margin: 0; text-shadow: 2px 2px 4px #000; font-size: 2.5em; }
+        .forum-header h1 { color: var(--text-accent); margin: 0; text-shadow: 2px 2px 4px #000; font-size: 1.8em; }
 
-        .page-section { display: none; }
-        .page-section.active { display: block; }
-
-        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 20px; font-weight: bold; cursor: pointer; margin-right: 5px; font-size: 14px; }
+        /* 按鈕樣式 */
+        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 12px 20px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
         .btn:hover { filter: brightness(1.2); box-shadow: 0 0 10px var(--border-color); }
-        .btn-back { background: #444; color: #fff; margin-bottom: 20px; }
+        .btn-back { background: #444; color: #fff; margin-bottom: 20px; width: 100%; }
+
+        /* 列表表格 */
+        .forum-table { width: 100%; border-collapse: collapse; background: rgba(21, 21, 21, 0.9); }
+        th { background: rgba(44, 44, 44, 0.9); color: var(--border-color); padding: 12px; border-bottom: 2px solid var(--border-color); }
+        td { padding: 15px 12px; border-bottom: 1px solid #333; }
+        .topic-row:hover { background-color: rgba(42, 34, 21, 0.8); }
+
+        /* 內容顯示區 */
+        .topic-content { background: rgba(34, 34, 34, 0.9); border: 1px solid #444; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 15px; margin-top: 10px; }
+        .content-img { max-width: 100%; height: auto; margin-top: 10px; display: block; border: 1px solid #555; border-radius: 4px; }
+
+        /* 表單元素 */
+        input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; border-radius: 4px; font-size: 16px; } /* 16px 防止 iOS 自動放大 */
         
-        .btn-delete { background: var(--danger-red); color: white; border: none; padding: 2px 8px; font-size: 12px; cursor: pointer; margin-left: 10px; border-radius: 3px; display: none; }
+        /* 管理功能 */
+        .btn-delete { background: var(--danger-red); color: white; border: none; padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 3px; display: none; margin-top: 5px; }
         body.admin-mode .btn-delete { display: inline-block; }
 
-        .forum-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border-color); background: rgba(21, 21, 21, 0.9); }
-        th { background: rgba(44, 44, 44, 0.9); color: var(--border-color); padding: 12px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 15px 12px; border-bottom: 1px solid #333; }
-        .topic-row:hover { background-color: rgba(42, 34, 21, 0.8); cursor: pointer; }
+        /* 響應式調整 (手機端) */
+        @media (max-width: 600px) {
+            .forum-header h1 { font-size: 1.5em; }
+            th:nth-child(2), td:nth-child(2) { display: none; } /* 手機版隱藏作者列，節省空間 */
+            .forum-table td { padding: 20px 10px; font-size: 1.1em; }
+            .admin-controls { position: static; margin-top: 10px; flex-direction: column; }
+            .btn { width: 100%; margin-bottom: 5px; }
+        }
 
-        .topic-content { background: rgba(34, 34, 34, 0.9); border: 1px solid #444; padding: 20px; margin-bottom: 20px; }
-        .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 10px 15px; margin-top: 10px; }
-        .content-img { max-width: 100%; height: auto; margin-top: 10px; display: block; border: 1px solid #555; }
+        /* 彈窗設計 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; box-shadow: 0 0 30px #000; }
 
-        input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; box-sizing: border-box; margin-bottom: 10px; }
-        .file-input-info { margin-bottom: 15px; color: #aaa; font-size: 13px; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a1a; padding: 30px; border: 2px solid var(--border-color); width: 320px; box-shadow: 0 0 30px #000; }
-
-        .admin-controls { position: absolute; right: 10px; top: 10px; display: none; gap: 5px; }
-        body.admin-mode .admin-controls { display: flex; }
-
-        .footer { text-align: center; padding: 40px; color: #888; font-size: 12px; border-top: 1px solid rgba(191, 160, 93, 0.3); background: rgba(0,0,0,0.5); margin-top: 20px; }
+        .footer { text-align: center; padding: 30px; color: #666; font-size: 12px; border-top: 1px solid rgba(191, 160, 93, 0.2); margin-top: 20px; }
+        .page-section { display: none; animation: fadeIn 0.3s; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body id="body-tag">
 
 <div class="container">
+    <!-- 頂部標題 -->
     <div class="forum-header">
         <h1>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</h1>
-        <div id="admin-status" style="color: #aaa; font-size: 12px; margin-top: 5px; letter-spacing: 1px;">當前身份：你是要衝+9 +10的冒險者吧</div>
-        <div class="admin-controls">
-            <button class="btn" style="font-size: 12px; padding: 5px 10px;" onclick="openModal('pw-modal')">🔧 更改密密</button>
-            <button class="btn" style="background: #a30000; color: #fff; font-size: 12px; padding: 5px 10px;" onclick="adminLogout()">🚪 登出系統</button>
+        <div id="admin-status" style="color: #888; font-size: 12px; margin-top: 5px;"你是那個衝上+9 +10的冒險這吧</div>
+        <div class="admin-controls" id="admin-ctrls" style="display:none; gap:10px; justify-content:center; margin-top:10px;">
+            <button class="btn" style="padding: 5px 15px;" onclick="openModal('pw-modal')">🔧 密碼修改</button>
+            <button class="btn" style="background: #a30000; color: #fff; padding: 5px 15px;" onclick="adminLogout()">🚪 登出</button>
         </div>
     </div>
 
-    <!-- 列表頁 -->
+    <!-- 1. 列表頁 -->
     <div id="home-page" class="page-section active">
-        <button class="btn" onclick="showSection('post-page')" style="margin-bottom:15px;">⚔️ 撰寫冒險筆記</button>
+        <button class="btn" onclick="showSection('post-page')" style="width:100%; margin-bottom:15px; font-size:1.1em;">📝 撰寫冒險筆記</button>
         <table class="forum-table">
-            <thead><tr><th align="left">📜 冒險主題</th><th width="150">👤 已成為+9 +10衝裝的冒險者</th></tr></thead>
+            <thead><tr><th align="left">📜 主題列表</th><th width="100">👤 作者</th></tr></thead>
             <tbody id="topic-list"></tbody>
         </table>
     </div>
 
-    <!-- 管理者登入彈窗 -->
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="color: var(--text-accent); margin-top:0;">🛡️ 管理者驗證</h3>
-            <input type="password" id="login-pass" placeholder="請輸入管理密令">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn" onclick="processLogin()" style="flex:1;">登入</button>
-                <button class="btn" style="background: #444; color: #fff; flex:1;" onclick="closeModal('login-modal')">取消</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 更改密碼彈窗 -->
-    <div id="pw-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="color: var(--text-accent); margin-top:0;">🔑 更改管理密令</h3>
-            <input type="password" id="new-admin-pass" placeholder="輸入新密碼">
-            <input type="password" id="confirm-admin-pass" placeholder="再次輸入新密碼">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn" onclick="processChangePw()" style="flex:1;">確認修改</button>
-                <button class="btn" style="background: #444; color: #fff; flex:1;" onclick="closeModal('pw-modal')">取消</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 主題內容頁、發佈頁面 (略，保持不變) -->
+    <!-- 2. 主題內容頁 -->
     <div id="view-page" class="page-section">
-        <button class="btn btn-back" onclick="showSection('home-page')">⬅️ 返回村莊</button>
+        <button class="btn btn-back" onclick="showSection('home-page')">⬅️ 回到村莊列表</button>
         <div class="topic-content">
-            <h2 id="display-title" style="color: var(--text-accent); margin:0;"></h2>
-            <button class="btn-delete" id="delete-topic-btn">🗑️ 焚毀此紀錄</button>
-            <p>紀錄者：<span style="color:#88bcff; font-weight:bold;" id="display-author"></span></p>
-            <div id="display-content" style="white-space: pre-wrap; margin-top:15px; border-top:1px solid #444; padding-top:15px;"></div>
+            <h2 id="display-title" style="color: var(--text-accent); margin-bottom:5px;"></h2>
+            <div style="font-size:13px; color:#88bcff;">筆記者：<span id="display-author"></span></div>
+            <button class="btn-delete" id="delete-topic-btn">🗑️ 焚毀紀錄</button>
+            <div id="display-content" style="white-space: pre-wrap; margin-top:20px; line-height:1.6; border-top:1px solid #444; padding-top:15px;"></div>
         </div>
+        
         <div id="reply-list"></div>
-        <div style="background:rgba(28, 28, 28, 0.9); padding:25px; border:1px dashed #555; margin-top:20px;">
-            <h3>💬 留言回覆</h3>
-            <input type="text" id="reply-name" placeholder="留遊戲ID才可以衝上武器+9 +10">
-            <textarea id="reply-content" placeholder="內容..."></textarea>
-            <div class="file-input-info">📎 附帶圖像 (限制 500KB)：<input type="file" id="reply-file" accept="image/*"></div>
-            <button class="btn" onclick="submitReply()">🏹 傳送訊息</button>
+
+        <div style="background:rgba(40, 40, 40, 0.8); padding:20px; border:1px dashed var(--border-color); margin-top:20px; border-radius:8px;">
+            <h3 style="margin-top:0;">💬 發表回覆</h3>
+            <input type="text" id="reply-name" placeholder="輸入遊戲ID 衝武器才會+9 +10">
+            <textarea id="reply-content" placeholder="輸入留言內容..." style="height:100px;"></textarea>
+            <div style="font-size:12px; color:#aaa; margin-bottom:10px;">📎 圖片上傳 (限 500KB)：<input type="file" id="reply-file" accept="image/*"></div>
+            <button class="btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
         </div>
     </div>
 
+    <!-- 3. 發佈頁面 -->
     <div id="post-page" class="page-section">
         <button class="btn btn-back" onclick="showSection('home-page')">⬅️ 取消撰寫</button>
-        <div style="background:rgba(28, 28, 28, 0.9); padding:25px; border:2px solid var(--border-color);">
-            <h2>📜 要討論什麼好呢？</h2>
-            <input type="text" id="post-name" placeholder="留遊戲ID才可以衝上武器+9 +10">
-            <input type="text" id="post-title" placeholder="主題標題">
-            <textarea id="post-content" placeholder="內容 (文字或圖片網址)..." style="height:150px;"></textarea>
-            <div class="file-input-info">📎 附帶圖像 (限制 500KB)：<input type="file" id="post-file" accept="image/*"></div>
-            <button class="btn" onclick="submitPost()">✅ 確認發佈</button>
+        <div style="background:rgba(30, 30, 30, 0.9); padding:20px; border:1px solid var(--border-color); border-radius:8px;">
+            <h2 style="color:var(--text-accent); margin-top:0;">✍️ 新的冒險紀錄</h2>
+            <input type="text" id="post-name" placeholder="輸入遊戲ID 衝武器才會+9 +10">
+            <input type="text" id="post-title" placeholder="紀錄主題">
+            <textarea id="post-content" placeholder="內容描述..." style="height:180px;"></textarea>
+            <div style="font-size:12px; color:#aaa; margin-bottom:10px;">📎 圖片上傳 (限 500KB)：<input type="file" id="post-file" accept="image/*"></div>
+            <button class="btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
         </div>
     </div>
 
+    <!-- 彈窗區 (登入/更換密碼) -->
+    <div id="login-modal" class="modal"><div class="modal-content">
+        <h3 style="color:var(--text-accent);">🛡️ 管理員驗證</h3>
+        <input type="password" id="login-pass" placeholder="請輸入密令">
+        <button class="btn" onclick="processLogin()" style="width:100%; margin-top:10px;">進入系統</button>
+        <button class="btn" style="width:100%; margin-top:5px; background:#444; color:#fff;" onclick="closeModal('login-modal')">關閉</button>
+    </div></div>
+
+    <div id="pw-modal" class="modal"><div class="modal-content">
+        <h3 style="color:var(--text-accent);">🔑 修改密令</h3>
+        <input type="password" id="new-pw" placeholder="新密碼">
+        <input type="password" id="conf-pw" placeholder="確認新密碼">
+        <button class="btn" onclick="processChangePw()" style="width:100%; margin-top:10px;">確認修改</button>
+        <button class="btn" style="width:100%; margin-top:5px; background:#444; color:#fff;" onclick="closeModal('pw-modal')">取消</button>
+    </div></div>
+
     <div class="footer">
-        願殷海薩的祝福與你同在。 | <span style="cursor:pointer; color:#555;" onclick="openModal('login-modal')">管理員登入</span>
+        系統版本：3.8 跨平台雲端版 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span>
     </div>
 </div>
 
 <script>
-    // --- 1. Firebase 配置 (請自行填入) ---
+    // --- Firebase 配置 ---
     const firebaseConfig = {
   apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
   authDomain: "game1-7c85c.firebaseapp.com",
@@ -172,154 +182,141 @@
 
     let topicsData = {};
     let currentTopicId = null;
-    let currentAdminPass = "1qaz@WSX"; // 預設值，之後會從雲端同步
-    const MAX_FILE_SIZE = 500 * 1024;
+    let currentAdminPass = "1qaz@WSX"; 
+    const MAX_SIZE = 500 * 1024;
 
-    // --- 2. 監聽雲端資料 ---
-    topicsRef.on('value', (snapshot) => {
-        topicsData = snapshot.val() || {};
+    // 監聽數據
+    topicsRef.on('value', (snap) => {
+        topicsData = snap.val() || {};
         renderTopics();
         if (currentTopicId) viewTopic(currentTopicId);
     });
 
-    // 監聽管理員密碼變化
-    adminRef.child('password').on('value', (snapshot) => {
-        if (snapshot.val()) {
-            currentAdminPass = snapshot.val();
-        }
+    adminRef.child('password').on('value', (snap) => {
+        if (snap.val()) currentAdminPass = snap.val();
     });
 
-    // --- 3. 核心邏輯 ---
-    function formatContent(text, attachedImg) {
-        const urlRegex = /(https?:\/\/[^\s]+(\.jpg|\.png|\.gif|\.jpeg|\.webp))/gi;
-        let html = (text || "").replace(urlRegex, (url) => `<img src="${url}" class="content-img" />`);
-        if (attachedImg) html += `<img src="${attachedImg}" class="content-img" />`;
-        return html;
-    }
-
-    async function fileToBase64(file) {
-        if (!file) return null;
-        if (file.size > MAX_FILE_SIZE) {
-            alert(`⛔ 檔案太大了！目前大小：${Math.round(file.size/1024)}KB，最高限制：500KB`);
-            return "ERROR_SIZE";
-        }
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-        });
-    }
-
+    // 渲染列表
     function renderTopics() {
         const list = document.getElementById('topic-list');
         list.innerHTML = '';
-        const keys = Object.keys(topicsData).reverse();
-        keys.forEach(id => {
-            const topic = topicsData[id];
+        Object.keys(topicsData).reverse().forEach(id => {
+            const t = topicsData[id];
             const row = document.createElement('tr');
-            row.className = "topic-row";
+            row.className = 'topic-row';
             row.onclick = () => viewTopic(id);
-            row.innerHTML = `<td>${topic.title} <button class="btn-delete" onclick="deleteTopic('${id}', event)">[🗑️ 刪除]</button></td><td style="color:#88bcff; font-weight:bold;">${topic.name}</td>`;
+            row.innerHTML = `<td>${t.title} <button class="btn-delete" onclick="deleteTopic('${id}', event)">[🗑️]</button></td><td>${t.name}</td>`;
             list.appendChild(row);
         });
     }
 
+    // 檢視主題
     function viewTopic(id) {
         currentTopicId = id;
         const t = topicsData[id];
         if (!t) { showSection('home-page'); return; }
+        
         document.getElementById('display-title').innerText = t.title;
         document.getElementById('display-author').innerText = t.name;
         document.getElementById('display-content').innerHTML = formatContent(t.content, t.image);
         document.getElementById('delete-topic-btn').onclick = () => deleteTopic(id);
-        const replyList = document.getElementById('reply-list');
-        replyList.innerHTML = '';
+        
+        const rList = document.getElementById('reply-list');
+        rList.innerHTML = '';
         if (t.replies) {
-            Object.keys(t.replies).forEach(rId => {
-                const r = t.replies[rId];
-                const div = document.createElement('div');
-                div.className = 'reply-box';
-                div.innerHTML = `<div style="font-size:12px; color:#bfa05d; margin-bottom:5px;">${r.name} 說：<button class="btn-delete" onclick="deleteReply('${id}', '${rId}')">[🗑️ 刪除]</button></div><div>${formatContent(r.content, r.image)}</div>`;
-                replyList.appendChild(div);
+            Object.keys(t.replies).forEach(rid => {
+                const r = t.replies[rid];
+                const d = document.createElement('div');
+                d.className = 'reply-box';
+                d.innerHTML = `<div style="color:var(--border-color); font-size:12px;">${r.name} 於不久前： <button class="btn-delete" onclick="deleteReply('${id}','${rid}')">[🗑️]</button></div><div style="margin-top:5px;">${formatContent(r.content, r.image)}</div>`;
+                rList.appendChild(d);
             });
         }
         showSection('view-page');
     }
 
+    // 提交邏輯
     async function submitPost() {
         const n = document.getElementById('post-name').value;
         const t = document.getElementById('post-title').value;
         const c = document.getElementById('post-content').value;
-        const fileInput = document.getElementById('post-file');
-        if(!n || !t || !c) return alert("請填寫完整");
-        const base64Img = await fileToBase64(fileInput.files[0]);
-        if (base64Img === "ERROR_SIZE") return;
-        topicsRef.push({ name: n, title: t, content: c, image: base64Img, timestamp: Date.now() });
+        const f = document.getElementById('post-file').files[0];
+        if(!n || !t || !c) return alert("請填寫內容");
+
+        const img = await fileToBase64(f);
+        if(img === "ERR") return;
+
+        topicsRef.push({ name: n, title: t, content: c, image: img || "", time: Date.now() });
         showSection('home-page');
-        document.getElementById('post-name').value = ''; document.getElementById('post-title').value = ''; 
-        document.getElementById('post-content').value = ''; fileInput.value = '';
+        clearInputs(['post-name','post-title','post-content','post-file']);
     }
 
     async function submitReply() {
         const n = document.getElementById('reply-name').value;
         const c = document.getElementById('reply-content').value;
-        const fileInput = document.getElementById('reply-file');
-        if(!n || !c) return alert("不可為空");
-        const base64Img = await fileToBase64(fileInput.files[0]);
-        if (base64Img === "ERROR_SIZE") return;
-        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, image: base64Img, timestamp: Date.now() });
-        document.getElementById('reply-name').value = ''; document.getElementById('reply-content').value = ''; 
-        fileInput.value = '';
+        const f = document.getElementById('reply-file').files[0];
+        if(!n || !c) return alert("請填寫內容");
+
+        const img = await fileToBase64(f);
+        if(img === "ERR") return;
+
+        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, image: img || "", time: Date.now() });
+        clearInputs(['reply-name','reply-content','reply-file']);
     }
 
-    function deleteTopic(id, event) {
-        if(event) event.stopPropagation();
-        if(!confirm("確定要焚毀此紀錄嗎？")) return;
-        db.ref(`topics/${id}`).remove();
-        showSection('home-page');
+    // 工具函式
+    function formatContent(t, i) {
+        let html = t.replace(/\n/g, '<br>');
+        if(i) html += `<img src="${i}" class="content-img">`;
+        return html;
     }
 
-    function deleteReply(tId, rId) {
-        if(!confirm("刪除回覆？")) return;
-        db.ref(`topics/${tId}/replies/${rId}`).remove();
+    async function fileToBase64(file) {
+        if(!file) return null;
+        if(file.size > MAX_SIZE) { alert("⛔ 檔案超過 500KB！"); return "ERR"; }
+        return new Promise(res => {
+            const rd = new FileReader();
+            rd.readAsDataURL(file);
+            rd.onload = () => res(rd.result);
+        });
     }
 
-    // --- 管理功能 ---
+    function clearInputs(ids) { ids.forEach(id => document.getElementById(id).value = ''); }
+
+    function showSection(id) {
+        document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'home-page') currentTopicId = null;
+        window.scrollTo(0,0);
+    }
+
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    
-    function processLogin() {
-        if (document.getElementById('login-pass').value === currentAdminPass) {
-            document.getElementById('body-tag').classList.add('admin-mode');
-            document.getElementById('admin-status').innerText = `🔱 管理模式啟動`;
-            closeModal('login-modal');
-        } else { alert("密令錯誤！"); }
-    }
 
-    function processChangePw() {
-        const newP = document.getElementById('new-admin-pass').value;
-        const confP = document.getElementById('confirm-admin-pass').value;
-        if (!newP) return alert("不可為空");
-        if (newP !== confP) return alert("確認密碼不符");
-        
-        // 更新到 Firebase
-        adminRef.update({ password: newP }).then(() => {
-            alert("🔑 密令已成功更新至雲端！");
-            closeModal('pw-modal');
-        });
+    function processLogin() {
+        if(document.getElementById('login-pass').value === currentAdminPass) {
+            document.getElementById('body-tag').classList.add('admin-mode');
+            document.getElementById('admin-ctrls').style.display = 'flex';
+            document.getElementById('admin-status').innerText = "🔱 管理權限已開啟";
+            closeModal('login-modal');
+        } else { alert("密令錯誤"); }
     }
 
     function adminLogout() {
         document.getElementById('body-tag').classList.remove('admin-mode');
-        document.getElementById('admin-status').innerText = "當前身份：你是要衝+9 +10的冒險者吧";
+        document.getElementById('admin-ctrls').style.display = 'none';
+        document.getElementById('admin-status').innerText = "冒險者模式";
     }
 
-    function showSection(id) {
-        if (id === 'home-page') currentTopicId = null;
-        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        window.scrollTo(0,0);
+    function processChangePw() {
+        const p1 = document.getElementById('new-pw').value;
+        if(p1 && p1 === document.getElementById('conf-pw').value) {
+            adminRef.update({ password: p1 }).then(() => { alert("密碼已同步雲端！"); closeModal('pw-modal'); });
+        } else { alert("密碼不一致"); }
     }
+
+    function deleteTopic(id, e) { if(e) e.stopPropagation(); if(confirm("焚毀此主題？")) db.ref(`topics/${id}`).remove(); }
+    function deleteReply(tid, rid) { if(confirm("刪除回覆？")) db.ref(`topics/${tid}/replies/${rid}`).remove(); }
 </script>
 
 </body>
