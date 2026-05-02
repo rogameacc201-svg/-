@@ -14,77 +14,37 @@
             --gold-gradient: linear-gradient(180deg, #bfa05d 0%, #7a6331 100%);
         }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: "Microsoft JhengHei", serif;
-            margin: 0;
-            padding: 20px;
-        }
-
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: "Microsoft JhengHei", serif; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; }
-
-        .forum-header {
-            background-color: var(--header-bg);
-            border: 2px solid var(--border-color);
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-
+        .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .forum-header h1 { color: var(--text-accent); margin: 0; text-shadow: 2px 2px 4px #000; }
 
+        /* 介面控制 */
         .page-section { display: none; }
         .page-section.active { display: block; }
 
-        .btn {
-            background: var(--gold-gradient);
-            border: 1px solid #000;
-            color: #000;
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 15px;
-        }
+        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 20px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
         .btn:hover { filter: brightness(1.2); }
         .btn-back { background: #444; color: #fff; margin-bottom: 20px; }
 
-        .forum-table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1px solid var(--border-color);
-            background: #151515;
-        }
-
+        /* 列表 */
+        .forum-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border-color); background: #151515; }
         th { background: #2c2c2c; color: var(--border-color); padding: 12px; border-bottom: 1px solid var(--border-color); }
         td { padding: 15px 12px; border-bottom: 1px solid #333; cursor: pointer; }
         tr:hover { background-color: #2a2215; }
 
-        .post-form {
-            background: #1c1c1c;
-            border: 2px solid var(--border-color);
-            padding: 25px;
-            border-radius: 4px;
-        }
+        /* 內文與回覆區 */
+        .topic-content { background: #222; border: 1px solid #444; padding: 20px; margin-bottom: 20px; }
+        .author { color: #88bcff; font-weight: bold; }
+        
+        .reply-box { background: #1a1a1a; border-left: 3px solid var(--border-color); padding: 10px 15px; margin-top: 10px; font-size: 14px; }
+        .reply-author { color: #bfa05d; font-size: 12px; margin-bottom: 5px; }
 
+        .post-form { background: #1c1c1c; border: 2px solid var(--border-color); padding: 25px; margin-top: 20px; }
         .input-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 8px; color: var(--border-color); }
-        input, textarea {
-            width: 100%; padding: 12px; background: var(--input-bg);
-            border: 1px solid #555; color: #fff; box-sizing: border-box;
-        }
-
-        .topic-content {
-            background: #222;
-            border: 1px solid #444;
-            padding: 20px;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        .topic-info { border-bottom: 1px solid var(--border-color); margin-bottom: 15px; padding-bottom: 10px; }
-        .author { color: #88bcff; font-weight: bold; }
-
+        input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; box-sizing: border-box; }
+        
         .footer { text-align: center; padding: 40px; color: #555; font-size: 12px; }
     </style>
 </head>
@@ -95,7 +55,7 @@
         <h1>🛡️ 亞丁冒險者公會 🛡️</h1>
     </div>
 
-    <!-- 1. 首頁列表 -->
+    <!-- 首頁列表 -->
     <div id="home-page" class="page-section active">
         <button class="btn" onclick="showSection('post-page')">⚔️ 發起新的主題</button>
         <table class="forum-table">
@@ -105,139 +65,124 @@
                     <th width="150">發佈者</th>
                 </tr>
             </thead>
-            <tbody id="topic-list">
-                <!-- 預設內容 -->
-                <tr onclick="viewTopic('關於伺服器 3.8C 寵物系統', '精靈長老', '請問有人知道勝利果實去哪裡打嗎？我找了好久都沒看到。')">
-                    <td>[問題] 關於伺服器 3.8C 寵物系統</td>
-                    <td class="author">精靈長老</td>
-                </tr>
-            </tbody>
+            <tbody id="topic-list"></tbody>
         </table>
     </div>
 
-    <!-- 2. 發佈主題頁面 -->
+    <!-- 發佈頁面 -->
     <div id="post-page" class="page-section">
         <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
         <div class="post-form">
-            <h2 style="color: var(--text-accent); margin-top:0;">📜 撰寫新的羊皮紙訊息</h2>
-            <div class="input-group">
-                <label>冒險者名稱</label>
-                <input type="text" id="post-name" placeholder="輸入你的稱號...">
-            </div>
-            <div class="input-group">
-                <label>主題標題</label>
-                <input type="text" id="post-title" placeholder="標題內容...">
-            </div>
-            <div class="input-group">
-                <label>訊息內容</label>
-                <textarea id="post-content" placeholder="詳細描述內容..."></textarea>
-            </div>
+            <h2 style="color: var(--text-accent); margin:0 0 20px 0;">📜 撰寫新的羊皮紙訊息</h2>
+            <div class="input-group"><label>冒險者名稱</label><input type="text" id="post-name"></div>
+            <div class="input-group"><label>主題標題</label><input type="text" id="post-title"></div>
+            <div class="input-group"><label>內容</label><textarea id="post-content"></textarea></div>
             <button class="btn" onclick="submitPost()">確認發佈</button>
         </div>
     </div>
 
-    <!-- 3. 主題內容頁面 -->
+    <!-- 內容與回覆頁面 -->
     <div id="view-page" class="page-section">
         <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
-        
         <div class="topic-content">
-            <div class="topic-info">
-                <h2 id="display-title" style="color: var(--text-accent); margin:0;"></h2>
-                <p>發佈者：<span class="author" id="display-author"></span></p>
-            </div>
-            <div id="display-content" style="white-space: pre-wrap;"></div>
+            <h2 id="display-title" style="color: var(--text-accent); margin:0;"></h2>
+            <p>發佈者：<span class="author" id="display-author"></span></p>
+            <div id="display-content" style="white-space: pre-wrap; margin-top:15px; border-top:1px solid #444; padding-top:15px;"></div>
         </div>
 
+        <div id="reply-list"></div>
+
         <div class="post-form" style="border-style: dashed;">
-            <h3 style="color: var(--text-accent); margin-top:0;">💬 發表回覆</h3>
-            <div class="input-group">
-                <label>冒險者名稱</label>
-                <input type="text" id="reply-name" placeholder="輸入你的稱號...">
-            </div>
-            <div class="input-group">
-                <label>回覆內容</label>
-                <textarea id="reply-content" placeholder="寫下你的見解..."></textarea>
-            </div>
+            <h3 style="color: var(--text-accent); margin:0 0 15px 0;">💬 發表回覆</h3>
+            <div class="input-group"><label>冒險者名稱</label><input type="text" id="reply-name"></div>
+            <div class="input-group"><label>回覆內容</label><textarea id="reply-content"></textarea></div>
             <button class="btn" onclick="submitReply()">送出評論</button>
         </div>
     </div>
 
-    <div class="footer">
-        願殷海薩的祝福與你同在。
-    </div>
+    <div class="footer">願殷海薩的祝福與你同在。</div>
 </div>
 
 <script>
-    // 切換顯示區塊
-    function showSection(sectionId) {
-        document.querySelectorAll('.page-section').forEach(section => {
-            section.classList.remove('active');
+    let currentTopicId = null;
+
+    // 初始化：從 localStorage 讀取資料
+    let topics = JSON.parse(localStorage.getItem('lineage_forum_data')) || [
+        { id: 1, name: '精靈長老', title: '[公告] 歡迎來到亞丁討論區', content: '這裡可以自由討論伺服器設定。', replies: [] }
+    ];
+
+    function renderTopics() {
+        const list = document.getElementById('topic-list');
+        list.innerHTML = '';
+        topics.forEach((topic, index) => {
+            const row = document.createElement('tr');
+            row.onclick = () => viewTopic(index);
+            row.innerHTML = `<td>${topic.title}</td><td class="author">${topic.name}</td>`;
+            list.insertBefore(row, list.firstChild);
         });
-        document.getElementById(sectionId).classList.add('active');
-        window.scrollTo(0, 0);
     }
 
-    // 發佈新主題的邏輯
+    function showSection(id) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
     function submitPost() {
         const name = document.getElementById('post-name').value;
         const title = document.getElementById('post-title').value;
         const content = document.getElementById('post-content').value;
 
-        if (!name || !title || !content) {
-            alert('請完整填寫冒險資訊！');
-            return;
-        }
+        if (!name || !title || !content) return alert('請填寫完整！');
 
-        // 取得表格容器
-        const list = document.getElementById('topic-list');
-
-        // 創建新的表格行
-        const newRow = document.createElement('tr');
-        
-        // 設定點擊事件 (將內容傳遞給查看頁面)
-        newRow.onclick = function() {
-            viewTopic(title, name, content);
-        };
-
-        // 插入 HTML 內容
-        newRow.innerHTML = `
-            <td>${title}</td>
-            <td class="author">${name}</td>
-        `;
-
-        // 將新主題插入到列表的最上方
-        list.insertBefore(newRow, list.firstChild);
-
-        // 清空輸入框
-        document.getElementById('post-name').value = '';
+        topics.push({ id: Date.now(), name, title, content, replies: [] });
+        saveAndRefresh();
+        showSection('home-page');
+        document.getElementById('post-name').value = ''; 
         document.getElementById('post-title').value = '';
         document.getElementById('post-content').value = '';
-
-        alert('羊皮紙訊息已傳送至亞丁公會！');
-        showSection('home-page');
     }
 
-    // 查看主題
-    function viewTopic(title, author, content) {
-        document.getElementById('display-title').innerText = title;
-        document.getElementById('display-author').innerText = author;
-        document.getElementById('display-content').innerText = content;
+    function viewTopic(index) {
+        currentTopicId = index;
+        const topic = topics[index];
+        document.getElementById('display-title').innerText = topic.title;
+        document.getElementById('display-author').innerText = topic.name;
+        document.getElementById('display-content').innerText = topic.content;
+        
+        renderReplies();
         showSection('view-page');
     }
 
-    // 送出回覆的邏輯 (示範)
+    function renderReplies() {
+        const replyList = document.getElementById('reply-list');
+        replyList.innerHTML = '';
+        topics[currentTopicId].replies.forEach(r => {
+            const div = document.createElement('div');
+            div.className = 'reply-box';
+            div.innerHTML = `<div class="reply-author">${r.name} 說：</div><div>${r.content}</div>`;
+            replyList.appendChild(div);
+        });
+    }
+
     function submitReply() {
         const name = document.getElementById('reply-name').value;
         const content = document.getElementById('reply-content').value;
-        if(name && content) {
-            alert(name + '，你的回覆已記錄在卷軸中！');
-            document.getElementById('reply-name').value = '';
-            document.getElementById('reply-content').value = '';
-            showSection('home-page');
-        } else {
-            alert('回覆內容不可為空！');
-        }
+        if (!name || !content) return alert('請填寫完整！');
+
+        topics[currentTopicId].replies.push({ name, content });
+        saveAndRefresh();
+        renderReplies();
+        document.getElementById('reply-name').value = '';
+        document.getElementById('reply-content').value = '';
     }
+
+    function saveAndRefresh() {
+        localStorage.setItem('lineage_forum_data', JSON.stringify(topics));
+        renderTopics();
+    }
+
+    // 啟動載入
+    renderTopics();
 </script>
 
 </body>
