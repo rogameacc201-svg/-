@@ -24,7 +24,6 @@
 
         .container { max-width: 900px; margin: 0 auto; }
 
-        /* 頂部裝飾 */
         .forum-header {
             background-color: var(--header-bg);
             border: 2px solid var(--border-color);
@@ -36,11 +35,9 @@
 
         .forum-header h1 { color: var(--text-accent); margin: 0; text-shadow: 2px 2px 4px #000; }
 
-        /* 區塊顯示控制 */
         .page-section { display: none; }
         .page-section.active { display: block; }
 
-        /* 按鈕樣式 */
         .btn {
             background: var(--gold-gradient);
             border: 1px solid #000;
@@ -53,7 +50,6 @@
         .btn:hover { filter: brightness(1.2); }
         .btn-back { background: #444; color: #fff; margin-bottom: 20px; }
 
-        /* 列表樣式 */
         .forum-table {
             width: 100%;
             border-collapse: collapse;
@@ -65,7 +61,6 @@
         td { padding: 15px 12px; border-bottom: 1px solid #333; cursor: pointer; }
         tr:hover { background-color: #2a2215; }
 
-        /* 發文與回覆表單 */
         .post-form {
             background: #1c1c1c;
             border: 2px solid var(--border-color);
@@ -80,7 +75,6 @@
             border: 1px solid #555; color: #fff; box-sizing: border-box;
         }
 
-        /* 主題內容顯示 */
         .topic-content {
             background: #222;
             border: 1px solid #444;
@@ -111,14 +105,11 @@
                     <th width="150">發佈者</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="topic-list">
+                <!-- 預設內容 -->
                 <tr onclick="viewTopic('關於伺服器 3.8C 寵物系統', '精靈長老', '請問有人知道勝利果實去哪裡打嗎？我找了好久都沒看到。')">
                     <td>[問題] 關於伺服器 3.8C 寵物系統</td>
                     <td class="author">精靈長老</td>
-                </tr>
-                <tr onclick="viewTopic('MySQL 資料庫優化心得', '技術宅', '這是我最近整理的 SQL 優化腳本，分享給大家參考。')">
-                    <td>[心得] MySQL 資料庫優化心得</td>
-                    <td class="author">技術宅</td>
                 </tr>
             </tbody>
         </table>
@@ -139,13 +130,13 @@
             </div>
             <div class="input-group">
                 <label>訊息內容</label>
-                <textarea id="post-content" placeholder="內容..."></textarea>
+                <textarea id="post-content" placeholder="詳細描述內容..."></textarea>
             </div>
-            <button class="btn" onclick="alert('訊息已送出！(此為演示)'); showSection('home-page')">確認發佈</button>
+            <button class="btn" onclick="submitPost()">確認發佈</button>
         </div>
     </div>
 
-    <!-- 3. 主題內容與回覆頁面 -->
+    <!-- 3. 主題內容頁面 -->
     <div id="view-page" class="page-section">
         <button class="btn btn-back" onclick="showSection('home-page')">← 返回列表</button>
         
@@ -154,20 +145,20 @@
                 <h2 id="display-title" style="color: var(--text-accent); margin:0;"></h2>
                 <p>發佈者：<span class="author" id="display-author"></span></p>
             </div>
-            <div id="display-content"></div>
+            <div id="display-content" style="white-space: pre-wrap;"></div>
         </div>
 
         <div class="post-form" style="border-style: dashed;">
             <h3 style="color: var(--text-accent); margin-top:0;">💬 發表回覆</h3>
             <div class="input-group">
                 <label>冒險者名稱</label>
-                <input type="text" placeholder="輸入你的稱號...">
+                <input type="text" id="reply-name" placeholder="輸入你的稱號...">
             </div>
             <div class="input-group">
                 <label>回覆內容</label>
-                <textarea placeholder="寫下你的見解..."></textarea>
+                <textarea id="reply-content" placeholder="寫下你的見解..."></textarea>
             </div>
-            <button class="btn" onclick="alert('回覆成功！'); showSection('home-page')">送出評論</button>
+            <button class="btn" onclick="submitReply()">送出評論</button>
         </div>
     </div>
 
@@ -177,24 +168,75 @@
 </div>
 
 <script>
-    // 切換顯示區塊的函數
+    // 切換顯示區塊
     function showSection(sectionId) {
-        // 隱藏所有區塊
         document.querySelectorAll('.page-section').forEach(section => {
             section.classList.remove('active');
         });
-        // 顯示目標區塊
         document.getElementById(sectionId).classList.add('active');
-        // 捲動到頂部
         window.scrollTo(0, 0);
     }
 
-    // 查看主題內容
+    // 發佈新主題的邏輯
+    function submitPost() {
+        const name = document.getElementById('post-name').value;
+        const title = document.getElementById('post-title').value;
+        const content = document.getElementById('post-content').value;
+
+        if (!name || !title || !content) {
+            alert('請完整填寫冒險資訊！');
+            return;
+        }
+
+        // 取得表格容器
+        const list = document.getElementById('topic-list');
+
+        // 創建新的表格行
+        const newRow = document.createElement('tr');
+        
+        // 設定點擊事件 (將內容傳遞給查看頁面)
+        newRow.onclick = function() {
+            viewTopic(title, name, content);
+        };
+
+        // 插入 HTML 內容
+        newRow.innerHTML = `
+            <td>${title}</td>
+            <td class="author">${name}</td>
+        `;
+
+        // 將新主題插入到列表的最上方
+        list.insertBefore(newRow, list.firstChild);
+
+        // 清空輸入框
+        document.getElementById('post-name').value = '';
+        document.getElementById('post-title').value = '';
+        document.getElementById('post-content').value = '';
+
+        alert('羊皮紙訊息已傳送至亞丁公會！');
+        showSection('home-page');
+    }
+
+    // 查看主題
     function viewTopic(title, author, content) {
         document.getElementById('display-title').innerText = title;
         document.getElementById('display-author').innerText = author;
         document.getElementById('display-content').innerText = content;
         showSection('view-page');
+    }
+
+    // 送出回覆的邏輯 (示範)
+    function submitReply() {
+        const name = document.getElementById('reply-name').value;
+        const content = document.getElementById('reply-content').value;
+        if(name && content) {
+            alert(name + '，你的回覆已記錄在卷軸中！');
+            document.getElementById('reply-name').value = '';
+            document.getElementById('reply-content').value = '';
+            showSection('home-page');
+        } else {
+            alert('回覆內容不可為空！');
+        }
     }
 </script>
 
