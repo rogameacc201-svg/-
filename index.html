@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</title>
+    <!-- 引入 Firebase SDK (版本 9+) -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     
@@ -19,7 +20,6 @@
             --gold-gradient: linear-gradient(180deg, #bfa05d 0%, #7a6331 100%);
         }
 
-        /* 背景與基本設定 */
         html {
             background: url('bg.png') no-repeat center center fixed;
             background-size: cover;
@@ -43,66 +43,66 @@
         }
         .forum-header h1 { color: var(--text-accent); margin: 0; text-shadow: 2px 2px 4px #000; font-size: 1.8em; }
 
-        /* 按鈕樣式 */
-        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 12px 20px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        /* 按鈕樣式：精緻小按鈕 */
+        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; border-radius: 2px; }
         .btn:hover { filter: brightness(1.2); box-shadow: 0 0 10px var(--border-color); }
-        .btn-back { background: #444; color: #fff; margin-bottom: 20px; width: 100%; }
+        
+        .btn-post-main { 
+            display: inline-block; width: auto; padding: 8px 16px; font-size: 13px; margin-bottom: 15px; 
+        }
+
+        .btn-back { background: #444; color: #fff; margin-bottom: 20px; width: 100%; border-radius: 4px; }
+        .btn-delete { background: var(--danger-red); color: white; border: none; padding: 3px 8px; font-size: 11px; cursor: pointer; border-radius: 3px; display: none; }
+        body.admin-mode .btn-delete { display: inline-block; }
 
         /* 列表表格 */
-        .forum-table { width: 100%; border-collapse: collapse; background: rgba(21, 21, 21, 0.9); }
-        th { background: rgba(44, 44, 44, 0.9); color: var(--border-color); padding: 12px; border-bottom: 2px solid var(--border-color); }
+        .forum-table { width: 100%; border-collapse: collapse; background: rgba(21, 21, 21, 0.9); border: 1px solid #333; }
+        th { background: rgba(44, 44, 44, 0.9); color: var(--border-color); padding: 12px; border-bottom: 2px solid var(--border-color); text-align: left; }
         td { padding: 15px 12px; border-bottom: 1px solid #333; }
-        .topic-row:hover { background-color: rgba(42, 34, 21, 0.8); }
+        .topic-row:hover { background-color: rgba(42, 34, 21, 0.8); cursor: pointer; }
 
         /* 內容顯示區 */
         .topic-content { background: rgba(34, 34, 34, 0.9); border: 1px solid #444; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
         .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 15px; margin-top: 10px; }
         .content-img { max-width: 100%; height: auto; margin-top: 10px; display: block; border: 1px solid #555; border-radius: 4px; }
 
-        /* 表單元素 */
-        input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; border-radius: 4px; font-size: 16px; } /* 16px 防止 iOS 自動放大 */
+        input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
         
-        /* 管理功能 */
-        .btn-delete { background: var(--danger-red); color: white; border: none; padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 3px; display: none; margin-top: 5px; }
-        body.admin-mode .btn-delete { display: inline-block; }
-
-        /* 響應式調整 (手機端) */
+        /* 響應式調整 */
         @media (max-width: 600px) {
             .forum-header h1 { font-size: 1.5em; }
-            th:nth-child(2), td:nth-child(2) { display: none; } /* 手機版隱藏作者列，節省空間 */
-            .forum-table td { padding: 20px 10px; font-size: 1.1em; }
-            .admin-controls { position: static; margin-top: 10px; flex-direction: column; }
-            .btn { width: 100%; margin-bottom: 5px; }
+            th:nth-child(2), td:nth-child(2) { display: none; }
+            .btn-post-main { width: auto; font-size: 13px; }
+            .admin-controls { position: static; margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+            .btn-admin-top { width: 100%; }
         }
 
-        /* 彈窗設計 */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; box-shadow: 0 0 30px #000; }
+        /* 彈窗 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; box-shadow: 0 0 30px #000; border-radius: 5px; }
 
         .footer { text-align: center; padding: 30px; color: #666; font-size: 12px; border-top: 1px solid rgba(191, 160, 93, 0.2); margin-top: 20px; }
-        .page-section { display: none; animation: fadeIn 0.3s; }
+        .page-section { display: none; }
         .page-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body id="body-tag">
 
 <div class="container">
-    <!-- 頂部標題 -->
     <div class="forum-header">
         <h1>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</h1>
-        <div id="admin-status" style="color: #888; font-size: 12px; margin-top: 5px;"你是那個衝上+9 +10的冒險這吧</div>
+        <div id="admin-status" style="color: #888; font-size: 12px; margin-top: 5px;">冒險者模式</div>
         <div class="admin-controls" id="admin-ctrls" style="display:none; gap:10px; justify-content:center; margin-top:10px;">
-            <button class="btn" style="padding: 5px 15px;" onclick="openModal('pw-modal')">🔧 密碼修改</button>
-            <button class="btn" style="background: #a30000; color: #fff; padding: 5px 15px;" onclick="adminLogout()">🚪 登出</button>
+            <button class="btn btn-admin-top" style="padding: 5px 15px;" onclick="openModal('pw-modal')">🔧 修改密令</button>
+            <button class="btn btn-admin-top" style="background: #a30000; color: #fff; padding: 5px 15px;" onclick="adminLogout()">🚪 登出</button>
         </div>
     </div>
 
     <!-- 1. 列表頁 -->
     <div id="home-page" class="page-section active">
-        <button class="btn" onclick="showSection('post-page')" style="width:100%; margin-bottom:15px; font-size:1.1em;">📝 撰寫冒險筆記</button>
+        <button class="btn btn-post-main" onclick="showSection('post-page')">📝 撰寫冒險筆記</button>
         <table class="forum-table">
-            <thead><tr><th align="left">📜 主題列表</th><th width="100">👤 作者</th></tr></thead>
+            <thead><tr><th>📜 主題列表</th><th width="100">👤 作者</th></tr></thead>
             <tbody id="topic-list"></tbody>
         </table>
     </div>
@@ -121,7 +121,7 @@
 
         <div style="background:rgba(40, 40, 40, 0.8); padding:20px; border:1px dashed var(--border-color); margin-top:20px; border-radius:8px;">
             <h3 style="margin-top:0;">💬 發表回覆</h3>
-            <input type="text" id="reply-name" placeholder="輸入遊戲ID 衝武器才會+9 +10">
+            <input type="text" id="reply-name" placeholder="你的稱呼">
             <textarea id="reply-content" placeholder="輸入留言內容..." style="height:100px;"></textarea>
             <div style="font-size:12px; color:#aaa; margin-bottom:10px;">📎 圖片上傳 (限 500KB)：<input type="file" id="reply-file" accept="image/*"></div>
             <button class="btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
@@ -133,7 +133,7 @@
         <button class="btn btn-back" onclick="showSection('home-page')">⬅️ 取消撰寫</button>
         <div style="background:rgba(30, 30, 30, 0.9); padding:20px; border:1px solid var(--border-color); border-radius:8px;">
             <h2 style="color:var(--text-accent); margin-top:0;">✍️ 新的冒險紀錄</h2>
-            <input type="text" id="post-name" placeholder="輸入遊戲ID 衝武器才會+9 +10">
+            <input type="text" id="post-name" placeholder="冒險者名稱">
             <input type="text" id="post-title" placeholder="紀錄主題">
             <textarea id="post-content" placeholder="內容描述..." style="height:180px;"></textarea>
             <div style="font-size:12px; color:#aaa; margin-bottom:10px;">📎 圖片上傳 (限 500KB)：<input type="file" id="post-file" accept="image/*"></div>
@@ -141,16 +141,16 @@
         </div>
     </div>
 
-    <!-- 彈窗區 (登入/更換密碼) -->
+    <!-- 彈窗 -->
     <div id="login-modal" class="modal"><div class="modal-content">
         <h3 style="color:var(--text-accent);">🛡️ 管理員驗證</h3>
         <input type="password" id="login-pass" placeholder="請輸入密令">
-        <button class="btn" onclick="processLogin()" style="width:100%; margin-top:10px;">進入系統</button>
-        <button class="btn" style="width:100%; margin-top:5px; background:#444; color:#fff;" onclick="closeModal('login-modal')">關閉</button>
+        <button class="btn" onclick="processLogin()" style="width:100%; margin-top:10px;">登入</button>
+        <button class="btn" style="width:100%; margin-top:5px; background:#444; color:#fff;" onclick="closeModal('login-modal')">取消</button>
     </div></div>
 
     <div id="pw-modal" class="modal"><div class="modal-content">
-        <h3 style="color:var(--text-accent);">🔑 修改密令</h3>
+        <h3 style="color:var(--text-accent);">🔑 修改雲端密令</h3>
         <input type="password" id="new-pw" placeholder="新密碼">
         <input type="password" id="conf-pw" placeholder="確認新密碼">
         <button class="btn" onclick="processChangePw()" style="width:100%; margin-top:10px;">確認修改</button>
@@ -158,12 +158,12 @@
     </div></div>
 
     <div class="footer">
-        系統版本：3.8 跨平台雲端版 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span>
+        系統版本：3.8 亞丁雲端版 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span>
     </div>
 </div>
 
 <script>
-    // --- Firebase 配置 ---
+    // --- 1. Firebase 配置 (請務必填入你的資訊) ---
     const firebaseConfig = {
   apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
   authDomain: "game1-7c85c.firebaseapp.com",
@@ -183,9 +183,9 @@
     let topicsData = {};
     let currentTopicId = null;
     let currentAdminPass = "1qaz@WSX"; 
-    const MAX_SIZE = 500 * 1024;
+    const MAX_SIZE = 500 * 1024; // 500KB
 
-    // 監聽數據
+    // --- 2. 監聽資料 ---
     topicsRef.on('value', (snap) => {
         topicsData = snap.val() || {};
         renderTopics();
@@ -196,7 +196,7 @@
         if (snap.val()) currentAdminPass = snap.val();
     });
 
-    // 渲染列表
+    // --- 3. 核心功能 ---
     function renderTopics() {
         const list = document.getElementById('topic-list');
         list.innerHTML = '';
@@ -210,7 +210,6 @@
         });
     }
 
-    // 檢視主題
     function viewTopic(id) {
         currentTopicId = id;
         const t = topicsData[id];
@@ -228,14 +227,13 @@
                 const r = t.replies[rid];
                 const d = document.createElement('div');
                 d.className = 'reply-box';
-                d.innerHTML = `<div style="color:var(--border-color); font-size:12px;">${r.name} 於不久前： <button class="btn-delete" onclick="deleteReply('${id}','${rid}')">[🗑️]</button></div><div style="margin-top:5px;">${formatContent(r.content, r.image)}</div>`;
+                d.innerHTML = `<div style="color:var(--border-color); font-size:11px;">${r.name}： <button class="btn-delete" onclick="deleteReply('${id}','${rid}')">[🗑️]</button></div><div style="margin-top:5px;">${formatContent(r.content, r.image)}</div>`;
                 rList.appendChild(d);
             });
         }
         showSection('view-page');
     }
 
-    // 提交邏輯
     async function submitPost() {
         const n = document.getElementById('post-name').value;
         const t = document.getElementById('post-title').value;
@@ -246,9 +244,11 @@
         const img = await fileToBase64(f);
         if(img === "ERR") return;
 
-        topicsRef.push({ name: n, title: t, content: c, image: img || "", time: Date.now() });
-        showSection('home-page');
-        clearInputs(['post-name','post-title','post-content','post-file']);
+        topicsRef.push({ name: n, title: t, content: c, image: img || "", time: Date.now() })
+        .then(() => {
+            showSection('home-page');
+            clearInputs(['post-name','post-title','post-content','post-file']);
+        });
     }
 
     async function submitReply() {
@@ -260,11 +260,13 @@
         const img = await fileToBase64(f);
         if(img === "ERR") return;
 
-        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, image: img || "", time: Date.now() });
-        clearInputs(['reply-name','reply-content','reply-file']);
+        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, image: img || "", time: Date.now() })
+        .then(() => {
+            clearInputs(['reply-name','reply-content','reply-file']);
+        });
     }
 
-    // 工具函式
+    // --- 4. 工具與管理 ---
     function formatContent(t, i) {
         let html = t.replace(/\n/g, '<br>');
         if(i) html += `<img src="${i}" class="content-img">`;
@@ -273,7 +275,7 @@
 
     async function fileToBase64(file) {
         if(!file) return null;
-        if(file.size > MAX_SIZE) { alert("⛔ 檔案超過 500KB！"); return "ERR"; }
+        if(file.size > MAX_SIZE) { alert("⛔ 檔案太大了！請限制在 500KB 以內。"); return "ERR"; }
         return new Promise(res => {
             const rd = new FileReader();
             rd.readAsDataURL(file);
@@ -315,8 +317,8 @@
         } else { alert("密碼不一致"); }
     }
 
-    function deleteTopic(id, e) { if(e) e.stopPropagation(); if(confirm("焚毀此主題？")) db.ref(`topics/${id}`).remove(); }
-    function deleteReply(tid, rid) { if(confirm("刪除回覆？")) db.ref(`topics/${tid}/replies/${rid}`).remove(); }
+    function deleteTopic(id, e) { if(e) e.stopPropagation(); if(confirm("確定焚毀此主題？")) db.ref(`topics/${id}`).remove(); }
+    function deleteReply(tid, rid) { if(confirm("確定刪除此回覆？")) db.ref(`topics/${tid}/replies/${rid}`).remove(); }
 </script>
 
 </body>
