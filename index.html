@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</title>
     
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     
@@ -35,65 +36,48 @@
 
         .container { max-width: 900px; margin: 0 auto; }
 
-        /* --- 改良：可收合式側邊跟蹤選單 --- */
-        .side-menu-container {
-            position: fixed;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* --- 手機瀏覽器引導橫幅 --- */
+        #browser-notice {
+            display: none;
+            background: #a30000;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            border: 2px solid var(--text-accent);
+            margin-bottom: 15px;
+            border-radius: 5px;
         }
 
-        /* 當含有 .hidden 類別時，向右偏移隱藏 */
-        .side-menu-container.hidden {
-            transform: translateY(-50%) translateX(102px); /* 寬度100px + 邊框 */
+        /* --- 可收合側邊選單 --- */
+        .side-menu-container {
+            position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9999;
+            display: flex; align-items: center;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        .side-menu-container.hidden { transform: translateY(-50%) translateX(102px); }
 
         .side-toggle-btn {
-            background: var(--header-bg);
-            border: 2px solid var(--border-color);
-            border-right: none;
-            color: var(--text-accent);
-            padding: 15px 5px;
-            cursor: pointer;
-            border-radius: 8px 0 0 8px;
-            font-size: 12px;
-            box-shadow: -3px 0 10px rgba(0,0,0,0.5);
-            writing-mode: vertical-rl;
-            letter-spacing: 2px;
+            background: var(--header-bg); border: 2px solid var(--border-color); border-right: none;
+            color: var(--text-accent); padding: 15px 6px; cursor: pointer; border-radius: 8px 0 0 8px;
+            font-size: 12px; writing-mode: vertical-rl; letter-spacing: 2px; box-shadow: -3px 0 10px rgba(0,0,0,0.5);
         }
 
-        .side-menu {
-            background: rgba(20, 20, 20, 0.95);
-            border: 2px solid var(--border-color);
-            border-right: none;
-            width: 100px;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.8);
-            overflow: hidden;
-        }
-
-        .side-menu a {
-            display: block; padding: 15px 10px; color: var(--text-accent);
-            text-decoration: none; text-align: center; font-weight: bold; font-size: 14px;
-            border-bottom: 1px solid rgba(191, 160, 93, 0.3); transition: 0.3s;
-        }
+        .side-menu { background: rgba(20, 20, 20, 0.95); border: 2px solid var(--border-color); border-right: none; width: 100px; }
+        .side-menu a { display: block; padding: 15px 10px; color: var(--text-accent); text-decoration: none; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(191, 160, 93, 0.2); }
         .side-menu a:hover { background: var(--gold-gradient); color: #000; }
-        .side-menu-title { background: #333; color: #fff; font-size: 11px; padding: 5px 0; text-align: center; }
 
-        /* --- 原有 UI 元件 --- */
-        .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px 10px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        /* --- UI 佈局 --- */
+        .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .forum-header h1 { color: var(--text-accent); margin: 0; font-size: 1.8em; text-shadow: 2px 2px 4px #000; }
 
         .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
         .search-wrapper { display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 0 10px; flex-grow: 1; max-width: 300px; }
-        .search-input { border: none !important; margin-bottom: 0 !important; padding: 8px !important; background: transparent !important; font-size: 14px !important; color: white !important; }
+        .search-input { border: none !important; margin-bottom: 0 !important; padding: 8px !important; background: transparent !important; color: white !important; font-size: 14px !important; }
 
-        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; border-radius: 2px; }
-        .btn:hover { filter: brightness(1.2); }
-        .btn:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; border-radius: 2px; }
+        .btn:disabled { background: #555; color: #aaa; cursor: not-allowed; filter: grayscale(1); }
         
         .forum-table { width: 100%; border-collapse: collapse; background: rgba(21, 21, 21, 0.9); border: 1px solid #333; }
         th { background: rgba(44, 44, 44, 0.9); color: var(--border-color); padding: 12px; border-bottom: 2px solid var(--border-color); text-align: left; }
@@ -110,18 +94,23 @@
         .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 15px; margin-top: 10px; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; text-align: center; }
+        .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; }
 
-        .footer { text-align: center; padding: 30px; color: #666; font-size: 12px; }
+        @media (max-width: 600px) {
+            .search-wrapper { max-width: 100%; order: 2; }
+            .btn-post-main { width: 100%; order: 1; }
+        }
     </style>
 </head>
 <body id="body-tag">
+
+<div id="browser-notice">⚠️ 偵測到內建瀏覽器，請點擊右上角「...」並選擇「使用預設瀏覽器開啟」以確保功能正常。</div>
 
 <!-- 可收合側邊跟蹤選單 -->
 <div class="side-menu-container" id="sideMenuContainer">
     <div class="side-toggle-btn" onclick="toggleSideMenu()" id="sideToggleBtn">◀ 快速傳送</div>
     <nav class="side-menu">
-        <div class="side-menu-title">傳送門</div>
+        <div style="background:#333; color:#fff; font-size:11px; padding:5px 0; text-align:center;">傳送門</div>
         <a href="https://rogameacc201-svg.github.io/my-auction/" target="_blank">💰 拍賣場</a>
         <a href="https://rogameacc201-svg.github.io/-/" target="_blank">💬 討論區</a>
     </nav>
@@ -133,7 +122,7 @@
         <div id="admin-status" style="color: #888; font-size: 12px; margin-top:5px;">冒險者模式</div>
     </div>
 
-    <!-- 1. 列表頁 -->
+    <!-- 列表頁 -->
     <div id="home-page" class="page-section active">
         <div class="action-bar">
             <button class="btn btn-post-main" onclick="showSection('post-page')">📝 撰寫冒險筆記</button>
@@ -141,9 +130,8 @@
                 <span style="color:var(--border-color); margin-right:5px;">🔍</span>
                 <input type="text" id="search-input" class="search-input" placeholder="搜索標題或作者..." onkeyup="filterTopics()">
             </div>
-            <button class="btn btn-batch-delete" onclick="batchDelete()" style="background:#a30000; color:#fff; display:none; padding:8px 15px;">🗑️ 批次刪除</button>
+            <button class="btn btn-batch-delete" onclick="batchDelete()" style="background:#a30000; color:#fff; display:none;">🗑️ 批次刪除</button>
         </div>
-
         <table class="forum-table">
             <thead>
                 <tr>
@@ -156,72 +144,56 @@
         </table>
     </div>
 
-    <!-- 2. 主題內容頁 -->
+    <!-- 內容頁 -->
     <div id="view-page" class="page-section">
         <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 返回村莊</button>
-        <div style="background:rgba(34,34,34,0.9); padding:20px; border-radius:5px; border:1px solid #444;">
+        <div style="background:rgba(34,34,34,0.9); padding:20px; border:1px solid #444;">
             <h2 id="display-title" style="color:var(--text-accent); margin:0;"></h2>
-            <div style="color:#88bcff; font-size:13px; margin-top:5px;">筆記者：<span id="display-author"></span></div>
+            <div id="display-author" style="color:#88bcff; font-size:13px; margin-top:5px;"></div>
             <hr style="border:0; border-top:1px solid #444; margin:15px 0;">
             <div id="display-content" style="white-space: pre-wrap; line-height:1.6;"></div>
         </div>
         <div id="reply-list" style="margin-top:20px;"></div>
-        <div style="background:rgba(40, 40, 40, 0.8); padding:20px; border:1px dashed var(--border-color); margin-top:20px; border-radius:8px;">
-            <h3 style="margin-top:0;">💬 發表回覆</h3>
-            <input type="text" id="reply-name" placeholder="你的稱呼">
-            <textarea id="reply-content" placeholder="輸入留言內容..." style="height:100px;"></textarea>
+        <div style="background:rgba(40,40,40,0.8); padding:20px; border:1px dashed var(--border-color); margin-top:20px;">
+            <input type="text" id="reply-name" placeholder="稱呼">
+            <textarea id="reply-content" placeholder="留言內容..."></textarea>
             <button class="btn" id="reply-submit-btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
         </div>
     </div>
 
-    <!-- 3. 發佈頁面 -->
+    <!-- 發佈頁 -->
     <div id="post-page" class="page-section">
-        <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 取消撰寫</button>
-        <div style="background:rgba(30,30,30,0.9); padding:20px; border:1px solid var(--border-color); border-radius:8px;">
-            <h2 style="color:var(--text-accent); margin-top:0;">✍️ 新的冒險紀錄</h2>
-            <input type="text" id="post-name" placeholder="冒險者名稱">
-            <input type="text" id="post-title" placeholder="紀錄主題">
-            <textarea id="post-content" placeholder="詳細內容..." style="height:200px;"></textarea>
-            <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
-        </div>
+        <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 取消</button>
+        <input type="text" id="post-name" placeholder="冒險者名稱">
+        <input type="text" id="post-title" placeholder="主題">
+        <textarea id="post-content" placeholder="內容..." style="height:200px;"></textarea>
+        <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
-    <!-- 登入彈窗 -->
     <div id="login-modal" class="modal"><div class="modal-content">
-        <h3 style="color:var(--text-accent);">🛡️ 管理員驗證</h3>
-        <input type="password" id="login-pass" placeholder="請輸入密令">
+        <input type="password" id="login-pass" placeholder="密令">
         <button class="btn" onclick="processLogin()" style="width:100%; margin-top:10px;">登入</button>
-        <button class="btn" style="width:100%; margin-top:5px; background:#444; color:#fff;" onclick="closeModal('login-modal')">取消</button>
     </div></div>
 
-    <div class="footer">系統版本：3.8 亞丁雲端版 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span></div>
+    <div style="text-align:center; padding:20px; color:#666; font-size:12px;">
+        系統版本：3.8 亞丁雲端版 | <span onclick="document.getElementById('login-modal').style.display='flex'" style="cursor:pointer;">管理登入</span>
+    </div>
 </div>
 
-// --- 0. 自動偵測並引導使用瀏覽器開啟 ---
-(function() {
-    var ua = navigator.userAgent.toLowerCase();
-    var isLine = ua.indexOf("line") > -1;
-    var isFb = ua.indexOf("fban") > -1 || ua.indexOf("fbav") > -1;
-
-    if (isLine || isFb) {
-        // 針對 LINE 的強制開啟瀏覽器路徑（部分版本有效）
-        if (window.location.href.indexOf('openExternalBrowser=1') === -1) {
-            var connector = window.location.href.indexOf('?') > -1 ? '&' : '?';
-            window.location.href = window.location.href + connector + 'openExternalBrowser=1';
-        }
-        
-        // 彈出提示提醒冒險者
-        setTimeout(function() {
-            alert("⚔️ 冒險者請注意：\n偵測到您正使用內建瀏覽器，為了確保「傳送門」與「筆記功能」正常運作，請點擊右上角「...」並選擇「使用瀏覽器開啟」。");
-        }, 500);
-    }
-})();
-
-// --- 1. Firebase 配置 (接著你原本的配置) ---
-const firebaseConfig = { ... };
-    
 <script>
-    // --- 1. Firebase 配置 (請在此填入你的資訊) ---
+    // --- 0. 環境偵測 ---
+    (function() {
+        var ua = navigator.userAgent.toLowerCase();
+        if (ua.indexOf("line") > -1 || ua.indexOf("fban") > -1 || ua.indexOf("fbav") > -1) {
+            document.getElementById('browser-notice').style.display = 'block';
+            if (window.location.href.indexOf('openExternalBrowser=1') === -1) {
+                var conn = window.location.href.indexOf('?') > -1 ? '&' : '?';
+                window.location.href = window.location.href + conn + 'openExternalBrowser=1';
+            }
+        }
+    })();
+
+    // --- 1. Firebase 配置 (請替換) ---
     const firebaseConfig = {
   apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
   authDomain: "game1-7c85c.firebaseapp.com",
@@ -239,22 +211,16 @@ const firebaseConfig = { ... };
 
     let topicsData = {};
     let currentTopicId = null;
-    const COOLDOWN_TIME = 20;
 
-    // --- 2. 側邊選單開關邏輯 ---
+    // --- 2. 側邊選單 ---
     function toggleSideMenu() {
         const container = document.getElementById('sideMenuContainer');
         const btn = document.getElementById('sideToggleBtn');
         container.classList.toggle('hidden');
-        
-        if (container.classList.contains('hidden')) {
-            btn.innerText = "▶ 展開傳送";
-        } else {
-            btn.innerText = "◀ 快速傳送";
-        }
+        btn.innerText = container.classList.contains('hidden') ? "▶ 展開傳送" : "◀ 快速傳送";
     }
 
-    // --- 3. 數據監聽與搜索 ---
+    // --- 3. 核心功能 ---
     topicsRef.on('value', (snap) => {
         topicsData = snap.val() || {};
         renderTopics();
@@ -262,12 +228,10 @@ const firebaseConfig = { ... };
     });
 
     function filterTopics() {
-        const query = document.getElementById('search-input').value.toLowerCase();
-        const rows = document.querySelectorAll('.topic-row');
-        rows.forEach(row => {
-            const title = row.querySelector('.topic-title').innerText.toLowerCase();
-            const author = row.querySelector('.topic-author').innerText.toLowerCase();
-            row.style.display = (title.includes(query) || author.includes(query)) ? "" : "none";
+        const q = document.getElementById('search-input').value.toLowerCase();
+        document.querySelectorAll('.topic-row').forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(q) ? "" : "none";
         });
     }
 
@@ -280,23 +244,21 @@ const firebaseConfig = { ... };
             row.className = 'topic-row';
             row.innerHTML = `
                 <td><input type="checkbox" class="admin-checkbox item-check" value="${id}"></td>
-                <td onclick="viewTopic('${id}')" class="topic-title">${t.title}</td>
-                <td onclick="viewTopic('${id}')" class="topic-author">${t.name}</td>
+                <td onclick="viewTopic('${id}')">${t.title}</td>
+                <td onclick="viewTopic('${id}')">${t.name}</td>
             `;
             list.appendChild(row);
         });
         if(document.getElementById('search-input').value) filterTopics();
     }
 
-    // --- 4. 發布冷卻 ---
-    function startCooldown(btnId, originalText) {
-        const btn = document.getElementById(btnId);
+    function startCooldown(id, text) {
+        const btn = document.getElementById(id);
         btn.disabled = true;
-        let timeLeft = COOLDOWN_TIME;
+        let time = 20;
         const timer = setInterval(() => {
-            btn.innerText = `⏳ 等待 ${timeLeft}s...`;
-            timeLeft--;
-            if (timeLeft < 0) { clearInterval(timer); btn.disabled = false; btn.innerText = originalText; }
+            btn.innerText = `⏳ 等待 ${time}s...`;
+            if (time-- <= 0) { clearInterval(timer); btn.disabled = false; btn.innerText = text; }
         }, 1000);
     }
 
@@ -304,10 +266,9 @@ const firebaseConfig = { ... };
         const n = document.getElementById('post-name').value;
         const t = document.getElementById('post-title').value;
         const c = document.getElementById('post-content').value;
-        if(!n || !t || !c) return alert("內容未填完");
+        if(!n || !t || !c) return alert("請填寫完整");
         topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => {
             showSection('home-page');
-            clearInputs(['post-title', 'post-content']);
             startCooldown('post-submit-btn', '✅ 確認發佈');
         });
     }
@@ -315,31 +276,28 @@ const firebaseConfig = { ... };
     async function submitReply() {
         const n = document.getElementById('reply-name').value;
         const c = document.getElementById('reply-content').value;
-        if(!n || !c) return alert("內容未填完");
+        if(!n || !c) return alert("請填寫完整");
         db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => {
-            clearInputs(['reply-name', 'reply-content']);
+            document.getElementById('reply-content').value = '';
             startCooldown('reply-submit-btn', '🏹 送出回覆');
         });
     }
 
-    // --- 5. 其他功能 ---
     function viewTopic(id) {
         currentTopicId = id;
         const t = topicsData[id];
-        if (!t) return;
+        if(!t) return;
         document.getElementById('display-title').innerText = t.title;
-        document.getElementById('display-author').innerText = t.name;
+        document.getElementById('display-author').innerText = "筆記者：" + t.name;
         document.getElementById('display-content').innerText = t.content;
         const rList = document.getElementById('reply-list');
         rList.innerHTML = '';
-        if (t.replies) {
-            Object.values(t.replies).forEach(r => {
-                const d = document.createElement('div');
-                d.className = 'reply-box';
-                d.innerHTML = `<small style="color:var(--border-color)">${r.name}：</small><br>${r.content}`;
-                rList.appendChild(d);
-            });
-        }
+        if(t.replies) Object.values(t.replies).forEach(r => {
+            const d = document.createElement('div');
+            d.className = 'reply-box';
+            d.innerHTML = `<small style="color:var(--border-color)">${r.name}：</small><br>${r.content}`;
+            rList.appendChild(d);
+        });
         showSection('view-page');
     }
 
@@ -349,24 +307,21 @@ const firebaseConfig = { ... };
         if(id === 'home-page') currentTopicId = null;
         window.scrollTo(0,0);
     }
-    function clearInputs(ids) { ids.forEach(id => document.getElementById(id).value = ''); }
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
     function processLogin() {
         if(document.getElementById('login-pass').value === "1qaz@WSX") {
             document.getElementById('body-tag').classList.add('admin-mode');
-            document.querySelector('.btn-batch-delete').style.display = 'inline-block';
+            document.querySelector('.btn-batch-delete').style.display = 'block';
             document.getElementById('admin-status').innerText = "🔱 管理權限已開啟";
-            closeModal('login-modal');
+            document.getElementById('login-modal').style.display = 'none';
         } else { alert("密令錯誤"); }
     }
-    function toggleAll(source) { document.querySelectorAll('.item-check').forEach(cb => cb.checked = source.checked); }
+
+    function toggleAll(src) { document.querySelectorAll('.item-check').forEach(cb => cb.checked = src.checked); }
     function batchDelete() {
         const sel = document.querySelectorAll('.item-check:checked');
-        if (sel.length === 0) return alert("未選取");
-        if (confirm(`刪除這 ${sel.length} 項？`)) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove());
+        if(sel.length && confirm(`確定刪除 ${sel.length} 項？`)) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove());
     }
 </script>
-
 </body>
 </html>
