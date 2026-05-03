@@ -197,6 +197,29 @@
     <div class="footer">系統版本：3.8 亞丁雲端版 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span></div>
 </div>
 
+// --- 0. 自動偵測並引導使用瀏覽器開啟 ---
+(function() {
+    var ua = navigator.userAgent.toLowerCase();
+    var isLine = ua.indexOf("line") > -1;
+    var isFb = ua.indexOf("fban") > -1 || ua.indexOf("fbav") > -1;
+
+    if (isLine || isFb) {
+        // 針對 LINE 的強制開啟瀏覽器路徑（部分版本有效）
+        if (window.location.href.indexOf('openExternalBrowser=1') === -1) {
+            var connector = window.location.href.indexOf('?') > -1 ? '&' : '?';
+            window.location.href = window.location.href + connector + 'openExternalBrowser=1';
+        }
+        
+        // 彈出提示提醒冒險者
+        setTimeout(function() {
+            alert("⚔️ 冒險者請注意：\n偵測到您正使用內建瀏覽器，為了確保「傳送門」與「筆記功能」正常運作，請點擊右上角「...」並選擇「使用瀏覽器開啟」。");
+        }, 500);
+    }
+})();
+
+// --- 1. Firebase 配置 (接著你原本的配置) ---
+const firebaseConfig = { ... };
+    
 <script>
     // --- 1. Firebase 配置 (請在此填入你的資訊) ---
     const firebaseConfig = {
