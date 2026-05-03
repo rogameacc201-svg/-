@@ -34,6 +34,50 @@
 
         .container { max-width: 900px; margin: 0 auto; }
 
+        /* --- 新增：浮動跟蹤選單 --- */
+        .side-menu {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 9999;
+            background: rgba(20, 20, 20, 0.95);
+            border: 2px solid var(--border-color);
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.8);
+            overflow: hidden;
+            width: 100px;
+        }
+
+        .side-menu a {
+            display: block;
+            padding: 15px 10px;
+            color: var(--text-accent);
+            text-decoration: none;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(191, 160, 93, 0.3);
+            transition: 0.3s;
+        }
+
+        .side-menu a:last-child { border-bottom: none; }
+        .side-menu a:hover {
+            background: var(--gold-gradient);
+            color: #000;
+        }
+
+        .side-menu-title {
+            background: #333;
+            color: #fff;
+            font-size: 11px;
+            padding: 5px 0;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        /* --- 舊有樣式優化 --- */
         .forum-header { 
             background-color: var(--header-bg); border: 2px solid var(--border-color); 
             padding: 20px 10px; text-align: center; margin-bottom: 20px; 
@@ -43,11 +87,10 @@
 
         .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; border-radius: 2px; }
         .btn:hover { filter: brightness(1.2); box-shadow: 0 0 10px var(--border-color); }
+        .btn:disabled { background: #555; color: #aaa; cursor: not-allowed; filter: grayscale(1); }
         
         .btn-post-main { display: inline-block; width: auto; padding: 8px 16px; font-size: 13px; margin-bottom: 15px; }
-        .btn-batch-delete { 
-            display: none; background: #a30000; color: #fff; padding: 8px 16px; font-size: 13px; margin-left: 10px; 
-        }
+        .btn-batch-delete { display: none; background: #a30000; color: #fff; padding: 8px 16px; font-size: 13px; margin-left: 10px; }
         body.admin-mode .btn-batch-delete { display: inline-block; }
 
         .btn-back { background: #444; color: #fff; margin-bottom: 20px; width: 100%; border-radius: 4px; }
@@ -59,30 +102,35 @@
         td { padding: 15px 12px; border-bottom: 1px solid #333; }
         .topic-row:hover { background-color: rgba(42, 34, 21, 0.8); cursor: pointer; }
 
-        /* 隱藏選取框，僅在管理模式顯示 */
         .admin-checkbox { display: none; transform: scale(1.2); margin-right: 10px; cursor: pointer; }
         body.admin-mode .admin-checkbox { display: inline-block; }
 
-        .topic-content { background: rgba(34, 34, 34, 0.9); border: 1px solid #444; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-        .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 15px; margin-top: 10px; }
-        .content-img { max-width: 100%; height: auto; margin-top: 10px; display: block; border: 1px solid #555; border-radius: 4px; }
-
         input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
         
-        @media (max-width: 600px) {
-            th:nth-child(3), td:nth-child(3) { display: none; }
-            .btn-batch-delete { margin-left: 0; margin-top: 5px; width: auto; }
-        }
-
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; box-shadow: 0 0 30px #000; border-radius: 5px; }
 
         .footer { text-align: center; padding: 30px; color: #666; font-size: 12px; border-top: 1px solid rgba(191, 160, 93, 0.2); margin-top: 20px; }
         .page-section { display: none; }
         .page-section.active { display: block; }
+        .content-img { max-width: 100%; height: auto; margin-top: 10px; display: block; border: 1px solid #555; border-radius: 4px; }
+        .topic-content { background: rgba(34, 34, 34, 0.9); border: 1px solid #444; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 15px; margin-top: 10px; }
+
+        @media (max-width: 600px) {
+            .side-menu { width: 80px; }
+            .side-menu a { font-size: 12px; padding: 10px 5px; }
+        }
     </style>
 </head>
 <body id="body-tag">
+
+<!-- 浮動跟蹤選單 -->
+<nav class="side-menu">
+    <div class="side-menu-title">傳送門</div>
+    <a href="https://rogameacc201-svg.github.io/my-auction/" target="_blank">💰 拍賣場</a>
+    <a href="https://rogameacc201-svg.github.io/-/" target="_blank">💬 討論區</a>
+</nav>
 
 <div class="container">
     <div class="forum-header">
@@ -98,7 +146,6 @@
     <div id="home-page" class="page-section active">
         <button class="btn btn-post-main" onclick="showSection('post-page')">📝 撰寫冒險筆記</button>
         <button class="btn btn-batch-delete" onclick="batchDelete()">🗑️ 批次刪除選中項</button>
-        
         <table class="forum-table">
             <thead>
                 <tr>
@@ -126,7 +173,7 @@
             <input type="text" id="reply-name" placeholder="你的稱呼">
             <textarea id="reply-content" placeholder="輸入留言內容..." style="height:100px;"></textarea>
             <div style="font-size:12px; color:#aaa; margin-bottom:10px;">📎 圖片上傳 (限 500KB)：<input type="file" id="reply-file" accept="image/*"></div>
-            <button class="btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
+            <button class="btn" id="reply-submit-btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
         </div>
     </div>
 
@@ -139,7 +186,7 @@
             <input type="text" id="post-title" placeholder="紀錄主題">
             <textarea id="post-content" placeholder="內容描述..." style="height:180px;"></textarea>
             <div style="font-size:12px; color:#aaa; margin-bottom:10px;">📎 圖片上傳 (限 500KB)：<input type="file" id="post-file" accept="image/*"></div>
-            <button class="btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
+            <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
         </div>
     </div>
 
@@ -165,7 +212,7 @@
 </div>
 
 <script>
-    // --- 1. Firebase 配置 ---
+    // --- 1. Firebase 配置 (請更換為你的配置) ---
     const firebaseConfig = {
   apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
   authDomain: "game1-7c85c.firebaseapp.com",
@@ -186,6 +233,7 @@
     let currentTopicId = null;
     let currentAdminPass = "1qaz@WSX"; 
     const MAX_SIZE = 500 * 1024;
+    const COOLDOWN_TIME = 20; // 20秒冷卻
 
     topicsRef.on('value', (snap) => {
         topicsData = snap.val() || {};
@@ -205,7 +253,6 @@
             const t = topicsData[id];
             const row = document.createElement('tr');
             row.className = 'topic-row';
-            // 點擊行時跳轉，但要排除勾選框的點擊
             row.onclick = (e) => {
                 if (e.target.type !== 'checkbox' && !e.target.classList.contains('btn-delete')) {
                     viewTopic(id);
@@ -218,36 +265,64 @@
             `;
             list.appendChild(row);
         });
-        document.getElementById('check-all').checked = false; // 渲染後取消全選框
+        document.getElementById('check-all').checked = false;
     }
 
+    function startCooldown(btnId, originalText) {
+        const btn = document.getElementById(btnId);
+        btn.disabled = true;
+        let timeLeft = COOLDOWN_TIME;
+        const timer = setInterval(() => {
+            btn.innerText = `⏳ 等待 ${timeLeft}s...`;
+            timeLeft--;
+            if (timeLeft < 0) {
+                clearInterval(timer);
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }, 1000);
+    }
+
+    async function submitPost() {
+        const n = document.getElementById('post-name').value;
+        const t = document.getElementById('post-title').value;
+        const c = document.getElementById('post-content').value;
+        const f = document.getElementById('post-file').files[0];
+        if(!n || !t || !c) return alert("請填寫內容");
+        const img = await fileToBase64(f);
+        if(img === "ERR") return;
+        topicsRef.push({ name: n, title: t, content: c, image: img || "", time: Date.now() }).then(() => {
+            showSection('home-page');
+            clearInputs(['post-name','post-title','post-content','post-file']);
+            startCooldown('post-submit-btn', '✅ 確認發佈');
+        });
+    }
+
+    async function submitReply() {
+        const n = document.getElementById('reply-name').value;
+        const c = document.getElementById('reply-content').value;
+        const f = document.getElementById('reply-file').files[0];
+        if(!n || !c) return alert("請填寫內容");
+        const img = await fileToBase64(f);
+        if(img === "ERR") return;
+        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, image: img || "", time: Date.now() }).then(() => {
+            clearInputs(['reply-name','reply-content','reply-file']);
+            startCooldown('reply-submit-btn', '🏹 送出回覆');
+        });
+    }
+
+    // --- 3. 其它管理功能 ---
     function toggleAll(source) {
         const checkboxes = document.getElementsByClassName('item-check');
-        for (let i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].checked = source.checked;
-        }
+        for (let i = 0; i < checkboxes.length; i++) checkboxes[i].checked = source.checked;
     }
 
     function batchDelete() {
         const checkboxes = document.getElementsByClassName('item-check');
-        const idsToDelete = [];
-        for (let i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].checked) {
-                idsToDelete.push(checkboxes[i].value);
-            }
-        }
-
-        if (idsToDelete.length === 0) {
-            alert("請先勾選要刪除的項目！");
-            return;
-        }
-
-        if (confirm(`確定要批次刪除這 ${idsToDelete.length} 項紀錄嗎？此動作無法復原！`)) {
-            idsToDelete.forEach(id => {
-                db.ref(`topics/${id}`).remove();
-            });
-            alert("批次刪除完成 🧹");
-        }
+        const ids = [];
+        for (let i = 0; i < checkboxes.length; i++) { if (checkboxes[i].checked) ids.push(checkboxes[i].value); }
+        if (ids.length === 0) return alert("未選取");
+        if (confirm(`刪除這 ${ids.length} 項？`)) ids.forEach(id => db.ref(`topics/${id}`).remove());
     }
 
     function viewTopic(id) {
@@ -272,32 +347,6 @@
         showSection('view-page');
     }
 
-    async function submitPost() {
-        const n = document.getElementById('post-name').value;
-        const t = document.getElementById('post-title').value;
-        const c = document.getElementById('post-content').value;
-        const f = document.getElementById('post-file').files[0];
-        if(!n || !t || !c) return alert("請填寫內容");
-        const img = await fileToBase64(f);
-        if(img === "ERR") return;
-        topicsRef.push({ name: n, title: t, content: c, image: img || "", time: Date.now() }).then(() => {
-            showSection('home-page');
-            clearInputs(['post-name','post-title','post-content','post-file']);
-        });
-    }
-
-    async function submitReply() {
-        const n = document.getElementById('reply-name').value;
-        const c = document.getElementById('reply-content').value;
-        const f = document.getElementById('reply-file').files[0];
-        if(!n || !c) return alert("請填寫內容");
-        const img = await fileToBase64(f);
-        if(img === "ERR") return;
-        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, image: img || "", time: Date.now() }).then(() => {
-            clearInputs(['reply-name','reply-content','reply-file']);
-        });
-    }
-
     function formatContent(t, i) {
         let html = t.replace(/\n/g, '<br>');
         if(i) html += `<img src="${i}" class="content-img">`;
@@ -306,7 +355,7 @@
 
     async function fileToBase64(file) {
         if(!file) return null;
-        if(file.size > MAX_SIZE) { alert("⛔ 檔案太大了！請限制在 500KB 以內。"); return "ERR"; }
+        if(file.size > MAX_SIZE) { alert("⛔ 500KB 以內"); return "ERR"; }
         return new Promise(res => {
             const rd = new FileReader();
             rd.readAsDataURL(file);
@@ -315,14 +364,12 @@
     }
 
     function clearInputs(ids) { ids.forEach(id => document.getElementById(id).value = ''); }
-
     function showSection(id) {
         document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(id === 'home-page') currentTopicId = null;
         window.scrollTo(0,0);
     }
-
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -344,12 +391,12 @@
     function processChangePw() {
         const p1 = document.getElementById('new-pw').value;
         if(p1 && p1 === document.getElementById('conf-pw').value) {
-            adminRef.update({ password: p1 }).then(() => { alert("密碼已同步雲端！"); closeModal('pw-modal'); });
-        } else { alert("密碼不一致"); }
+            adminRef.update({ password: p1 }).then(() => { alert("已修改！"); closeModal('pw-modal'); });
+        } else { alert("不一致"); }
     }
 
-    function deleteTopic(id, e) { if(e) e.stopPropagation(); if(confirm("確定焚毀此主題？")) db.ref(`topics/${id}`).remove(); }
-    function deleteReply(tid, rid) { if(confirm("確定刪除此回覆？")) db.ref(`topics/${tid}/replies/${rid}`).remove(); }
+    function deleteTopic(id, e) { if(e) e.stopPropagation(); if(confirm("焚毀？")) db.ref(`topics/${id}`).remove(); }
+    function deleteReply(tid, rid) { if(confirm("刪除？")) db.ref(`topics/${tid}/replies/${rid}`).remove(); }
 </script>
 
 </body>
