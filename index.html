@@ -35,7 +35,7 @@
         }
         @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* 內容顯示與超連結 */
+        /* 內容與連結 */
         #display-content, .reply-box { white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 16px; }
         #display-content a, .reply-box a { color: var(--link-color); text-decoration: underline; cursor: pointer; }
         img { cursor: zoom-in; max-width: 100%; height: auto; display: block; margin: 10px 0; border: 1px solid var(--border-color); }
@@ -44,10 +44,7 @@
         .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 10000; overflow: hidden; touch-action: none; }
         #lightbox-img { position: absolute; max-width: 90%; max-height: 90%; transition: transform 0.1s ease-out; cursor: grab; user-select: none; }
 
-        /* 編輯器 */
-        .rich-editor { width: 100%; min-height: 150px; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; outline: none; white-space: pre-wrap; word-break: break-all; }
-
-        /* 介面表格 */
+        /* 介面佈局 */
         .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; }
         .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; }
         .forum-table { width: 100%; border-collapse: collapse; background: rgba(21, 21, 21, 0.9); }
@@ -69,13 +66,12 @@
         body.admin-mode .admin-checkbox { display: inline-block; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; }
+        .rich-editor { width: 100%; min-height: 150px; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body id="body-tag">
 
-<div id="image-lightbox" class="lightbox">
-    <img id="lightbox-img" src="">
-</div>
+<div id="image-lightbox" class="lightbox"><img id="lightbox-img" src=""></div>
 
 <div class="side-menu-container" id="sideMenuContainer">
     <div class="side-toggle-btn" onclick="toggleSideMenu()">◀ 快速傳送</div>
@@ -122,7 +118,7 @@
         <div style="background:rgba(40,40,40,0.8); padding:20px; border:1px dashed var(--border-color); margin-top:20px;">
             <input type="text" id="reply-name" placeholder="稱呼" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
             <div id="reply-editor" class="rich-editor" contenteditable="true"></div>
-            <button class="btn" id="reply-submit-btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
+            <button class="btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
         </div>
     </div>
 
@@ -132,10 +128,9 @@
         <input type="text" id="post-name" placeholder="冒險者名稱" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
         <input type="text" id="post-title" placeholder="主題" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
         <div id="post-editor" class="rich-editor" contenteditable="true" style="height:300px;"></div>
-        <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
+        <button class="btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
-    <!-- 管理登入 Modal -->
     <div id="login-modal" class="modal"><div class="modal-content">
         <h3>🛡️ 管理員驗證</h3>
         <input type="password" id="login-pass" placeholder="輸入密令" style="width:100%; padding:10px; margin-bottom:10px;">
@@ -143,9 +138,7 @@
         <button onclick="closeModal('login-modal')" style="width:100%; margin-top:5px; background:#444; color:#fff; border:none; padding:8px;">取消</button>
     </div></div>
 
-    <div style="text-align:center; padding:20px; color:#666; font-size:12px;">
-        系統版本：3.8 亞丁雲端版 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span>
-    </div>
+    <div style="text-align:center; padding:20px; color:#666; font-size:12px;">系統版本：3.8 亞丁雲端版 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span></div>
 </div>
 
 <script>
@@ -163,27 +156,39 @@
     const topicsRef = db.ref('topics');
 
     let topicsData = {}, currentTopicId = null, adminPass = "1qaz@WSX";
-    let scale = 1, isDragging = false, startX, startY, moveX = 0, moveY = 0;
-    const lb = document.getElementById('image-lightbox');
-    const lbImg = document.getElementById('lightbox-img');
 
-    // --- 超連結偵測 ---
+    // --- NEW 標籤管理 (localStorage) ---
+    function markAsRead(id) {
+        let readList = JSON.parse(localStorage.getItem('read_topics') || '[]');
+        if (!readList.includes(id)) {
+            readList.push(id);
+            localStorage.setItem('read_topics', JSON.stringify(readList));
+        }
+    }
+
+    function isRead(id) {
+        let readList = JSON.parse(localStorage.getItem('read_topics') || '[]');
+        return readList.includes(id);
+    }
+
+    // --- 連結偵測 ---
     function linkify(text) {
         const urlPattern = /(https?:\/\/[^\s<]+)/g;
         return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" onclick="return confirmLink('${url}')">${url}</a>`);
     }
     function confirmLink(url) { return confirm("⚠️ 冒險提醒：即將離開討論區前往外部連結？\n\n" + url); }
 
-    // --- 列表渲染 (含 NEW 標籤邏輯) ---
+    // --- 列表渲染 ---
     function renderTopics() {
         const list = document.getElementById('topic-list'); list.innerHTML = '';
         Object.keys(topicsData).reverse().forEach(id => {
             const t = topicsData[id];
             const rCount = t.replies ? Object.keys(t.replies).length : 0;
             
-            // 判斷是否為 24 小時內的新文章
-            const isNew = (Date.now() - t.time) < (24 * 60 * 60 * 1000);
-            const newLabel = isNew ? `<span class="new-tag">[NEW]</span>` : "";
+            // 判斷是否顯示 NEW：(24小時內) 且 (使用者尚未點擊過)
+            const isWithin24h = (Date.now() - t.time) < (24 * 60 * 60 * 1000);
+            const showNew = isWithin24h && !isRead(id);
+            const newLabel = showNew ? `<span class="new-tag">[NEW]</span>` : "";
 
             const row = document.createElement('tr');
             row.className = 'topic-row';
@@ -194,8 +199,9 @@
         });
     }
 
-    // --- 內文查看 ---
+    // --- 進入主題 ---
     function viewTopic(id) {
+        markAsRead(id); // 點擊時標記為已讀
         currentTopicId = id; const t = topicsData[id];
         document.getElementById('display-title').innerText = t.title;
         document.getElementById('display-author').innerText = "筆記者：" + t.name;
@@ -210,54 +216,33 @@
         showSection('view-page');
     }
 
-    // --- Firebase 資料同步 ---
+    // --- Firebase & 基礎功能 ---
     topicsRef.on('value', (snap) => { topicsData = snap.val() || {}; renderTopics(); if(currentTopicId) viewTopic(currentTopicId); });
 
     async function submitPost() {
         const n = document.getElementById('post-name').value, t = document.getElementById('post-title').value, c = document.getElementById('post-editor').innerHTML;
-        if(!n || !t || !c.trim()) return alert("內容未填寫完成");
-        topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => {
-            showSection('home-page'); 
-            document.getElementById('post-name').value = '';
-            document.getElementById('post-title').value = '';
-            document.getElementById('post-editor').innerHTML = '';
-        });
+        if(!n || !t || !c.trim()) return alert("內容未填寫");
+        topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => { showSection('home-page'); });
     }
 
     async function submitReply() {
         const n = document.getElementById('reply-name').value, c = document.getElementById('reply-editor').innerHTML;
-        if(!n || !c.trim()) return alert("請輸入稱呼與內容");
-        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => {
-            document.getElementById('reply-editor').innerHTML = '';
-        });
+        if(!n || !c.trim()) return alert("內容未填寫");
+        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() });
     }
 
-    // --- 介面控制 ---
-    function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='home-page') currentTopicId=null; window.scrollTo(0,0); }
+    function showSection(id) { 
+        document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); 
+        if(id==='home-page') { currentTopicId=null; renderTopics(); } // 回首頁時重新渲染列表刷新標籤
+        window.scrollTo(0,0); 
+    }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function toggleSideMenu() { document.getElementById('sideMenuContainer').classList.toggle('hidden'); }
     function toggleAll(src) { document.querySelectorAll('.item-check').forEach(cb => cb.checked = src.checked); }
-    function batchDelete() { const sel = document.querySelectorAll('.item-check:checked'); if(sel.length && confirm('確定要將選中的冒險筆記刪除？')) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove()); }
-    function processLogin() {
-        if(document.getElementById('login-pass').value === adminPass) {
-            document.getElementById('body-tag').classList.add('admin-mode');
-            document.getElementById('batch-del-btn').style.display = 'block';
-            document.getElementById('admin-status').style.display = 'block';
-            closeModal('login-modal');
-        } else alert("密令錯誤");
-    }
-
-    // --- 燈箱邏輯 ---
-    document.addEventListener('click', (e) => {
-        if (e.target.tagName === 'IMG' && !e.target.closest('.rich-editor')) {
-            lbImg.src = e.target.src; scale = 1; moveX = 0; moveY = 0;
-            lb.style.display = 'flex';
-            lbImg.style.left = '50%'; lbImg.style.top = '50%';
-            lbImg.style.transform = `translate(-50%, -50%) scale(1)`;
-        }
-    });
-    lb.addEventListener('click', (e) => { if (e.target === lb) lb.style.display = 'none'; });
+    function batchDelete() { const sel = document.querySelectorAll('.item-check:checked'); if(sel.length && confirm('確定刪除？')) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove()); }
+    function processLogin() { if(document.getElementById('login-pass').value === adminPass) { document.getElementById('body-tag').classList.add('admin-mode'); document.getElementById('batch-del-btn').style.display = 'block'; document.getElementById('admin-status').style.display = 'block'; closeModal('login-modal'); } else alert("密令錯誤"); }
 </script>
 </body>
 </html>
