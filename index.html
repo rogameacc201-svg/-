@@ -41,17 +41,8 @@
         #display-content a, .reply-box a { color: var(--link-color); text-decoration: underline; cursor: pointer; }
         img { cursor: zoom-in; max-width: 100%; height: auto; display: block; margin: 10px 0; border: 1px solid var(--border-color); }
 
-        /* 燈箱樣式優化 */
         .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 10000; overflow: hidden; touch-action: none; }
-        #lightbox-img { 
-            position: absolute; 
-            max-width: 90%; 
-            max-height: 90%; 
-            transition: transform 0.1s ease-out; 
-            cursor: grab; 
-            user-select: none;
-            transform-origin: center; /* 確保縮放中心在中間 */
-        }
+        #lightbox-img { position: absolute; max-width: 90%; max-height: 90%; transition: transform 0.1s ease-out; cursor: grab; user-select: none; transform-origin: center; }
 
         .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; }
         .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; }
@@ -192,9 +183,14 @@
         if(p1 && p1 === p2) { configRef.set({ password: p1 }).then(() => { alert("密令修改成功！"); closeModal('pw-modal'); }); } else alert("密令不一致或為空");
     }
 
+    // --- NEW 標籤功能修正 ---
     function markAsRead(id) {
         let readList = JSON.parse(localStorage.getItem('read_topics') || '[]');
-        if (!readList.includes(id)) { readList.push(id); localStorage.setItem('read_topics', JSON.stringify(readList)); }
+        if (!readList.includes(id)) { 
+            readList.push(id); 
+            localStorage.setItem('read_topics', JSON.stringify(readList)); 
+            renderTopics(); // 立即重新渲染以更新 UI
+        }
     }
     function isRead(id) { return JSON.parse(localStorage.getItem('read_topics') || '[]').includes(id); }
 
@@ -204,42 +200,23 @@
     }
     function confirmLink(url) { return confirm("⚠️ 即將前往外部連結？\n\n" + url); }
 
-    // --- 燈箱核心功能 (含移動與縮放) ---
     const lb = document.getElementById('image-lightbox'), lbImg = document.getElementById('lightbox-img');
     let isDragging = false, startX, startY, imgX = 0, imgY = 0, imgScale = 1;
 
     document.addEventListener('click', (e) => {
         if(e.target.tagName === 'IMG' && e.target.id !== 'lightbox-img') {
             lbImg.src = e.target.src; lb.style.display = 'block';
-            imgX = 0; imgY = 0; imgScale = 1; // 重置狀態
-            updateImgTransform();
+            imgX = 0; imgY = 0; imgScale = 1; updateImgTransform();
         }
     });
 
     lb.onclick = (e) => { if(e.target === lb) lb.style.display = 'none'; };
-
-    // 縮放功能：滾輪事件
-    lb.onwheel = (e) => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.15 : 0.15; // 縮放級距
-        imgScale = Math.min(Math.max(0.5, imgScale + delta), 5); // 限制縮放範圍 0.5x ~ 5x
-        updateImgTransform();
-    };
-
-    // 拖曳功能
+    lb.onwheel = (e) => { e.preventDefault(); const delta = e.deltaY > 0 ? -0.15 : 0.15; imgScale = Math.min(Math.max(0.5, imgScale + delta), 5); updateImgTransform(); };
     lbImg.onmousedown = (e) => { isDragging = true; startX = e.clientX - imgX; startY = e.clientY - imgY; lbImg.style.cursor = 'grabbing'; e.preventDefault(); };
-    window.onmousemove = (e) => {
-        if(!isDragging) return;
-        imgX = e.clientX - startX; imgY = e.clientY - startY;
-        updateImgTransform();
-    };
+    window.onmousemove = (e) => { if(!isDragging) return; imgX = e.clientX - startX; imgY = e.clientY - startY; updateImgTransform(); };
     window.onmouseup = () => { isDragging = false; lbImg.style.cursor = 'grab'; };
+    function updateImgTransform() { lbImg.style.transform = `translate(-50%, -50%) translate(${imgX}px, ${imgY}px) scale(${imgScale})`; }
 
-    function updateImgTransform() {
-        lbImg.style.transform = `translate(-50%, -50%) translate(${imgX}px, ${imgY}px) scale(${imgScale})`;
-    }
-
-    // --- 渲染與基礎邏輯 ---
     function renderTopics() {
         const list = document.getElementById('topic-list'); list.innerHTML = '';
         Object.keys(topicsData).reverse().forEach(id => {
@@ -281,14 +258,26 @@
         const sel = document.querySelectorAll('.item-check-reply:checked');
         if(sel.length && confirm(`確定刪除這 ${sel.length} 則留言？`)) sel.forEach(cb => db.ref(`topics/${currentTopicId}/replies/${cb.value}`).remove());
     }
+
+    // --- 自動清空留言設定 ---
     function submitPost() {
-        const n = document.getElementById('post-name').value, t = document.getElementById('post-title').value, c = document.getElementById('post-editor').innerHTML;
-        if(n && t && c.trim()) topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => showSection('home-page'));
+        const n = document.getElementById('post-name'), t = document.getElementById('post-title'), c = document.getElementById('post-editor');
+        if(n.value && t.value && c.innerHTML.trim()) {
+            topicsRef.push({ name: n.value, title: t.value, content: c.innerHTML, time: Date.now() }).then(() => {
+                n.value = ""; t.value = ""; c.innerHTML = ""; // 發布後清空
+                showSection('home-page');
+            });
+        }
     }
     function submitReply() {
-        const n = document.getElementById('reply-name').value, c = document.getElementById('reply-editor').innerHTML;
-        if(n && c.trim()) db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => document.getElementById('reply-editor').innerHTML = '');
+        const n = document.getElementById('reply-name'), c = document.getElementById('reply-editor');
+        if(n.value && c.innerHTML.trim()) {
+            db.ref(`topics/${currentTopicId}/replies`).push({ name: n.value, content: c.innerHTML, time: Date.now() }).then(() => {
+                n.value = ""; c.innerHTML = ""; // 回覆後清空
+            });
+        }
     }
+
     function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='home-page') currentTopicId=null; window.scrollTo(0,0); }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
