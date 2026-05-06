@@ -27,32 +27,23 @@
         .new-tag { color: #ff3300; font-weight: bold; font-style: italic; margin-right: 8px; text-shadow: 0 0 5px rgba(255, 51, 0, 0.5); animation: flash 1.5s infinite; }
         @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* 修正內容溢出問題 */
         #display-content { 
-            white-space: pre-wrap; 
-            word-break: break-all; 
-            line-height: 1.6; 
-            font-size: 16px; 
-            max-height: 600px; /* 設定顯示區最大高度 */
-            overflow-y: auto;  /* 超出高度顯示捲軸 */
-            padding-right: 10px;
+            white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 16px; 
+            max-height: 600px; overflow-y: auto; padding-right: 10px;
         }
         
         .reply-box { 
-            white-space: pre-wrap; 
-            word-break: break-all; 
-            line-height: 1.6; 
-            font-size: 16px; 
-            background: rgba(26, 26, 26, 0.9); 
-            border-left: 3px solid var(--border-color); 
-            padding: 15px; 
-            margin-top: 10px; 
-            display: flex; 
-            align-items: flex-start; 
+            white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 16px; 
+            background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); 
+            padding: 15px; margin-top: 10px; display: flex; align-items: flex-start; 
         }
 
         #display-content a, .reply-box a { color: var(--link-color); text-decoration: underline; cursor: pointer; }
         img { cursor: zoom-in; max-width: 100%; height: auto; display: block; margin: 10px 0; border: 1px solid var(--border-color); }
+
+        /* 燈箱樣式 */
+        .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 10000; overflow: hidden; touch-action: none; }
+        #lightbox-img { position: absolute; max-width: 90%; max-height: 90%; transition: transform 0.1s ease-out; cursor: grab; user-select: none; }
 
         .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; }
         .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; }
@@ -70,20 +61,11 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; }
         
-        /* 修正編輯器溢出問題 */
         .rich-editor { 
-            width: 100%; 
-            min-height: 150px; 
-            max-height: 400px; /* 設定編輯器最大高度 */
-            padding: 12px; 
-            background: var(--input-bg); 
-            border: 1px solid #555; 
-            color: #fff; 
-            margin-bottom: 10px; 
-            box-sizing: border-box; 
-            outline: none; 
-            overflow-y: auto;  /* 超出高度顯示捲軸 */
-            word-break: break-all;
+            width: 100%; min-height: 150px; max-height: 400px; padding: 12px; 
+            background: var(--input-bg); border: 1px solid #555; color: #fff; 
+            margin-bottom: 10px; box-sizing: border-box; outline: none; 
+            overflow-y: auto; word-break: break-all;
         }
         
         .side-menu-container { position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9999; display: flex; align-items: center; transition: transform 0.4s; }
@@ -94,6 +76,9 @@
     </style>
 </head>
 <body id="body-tag">
+
+<!-- 燈箱 HTML -->
+<div id="image-lightbox" class="lightbox"><img id="lightbox-img" src=""></div>
 
 <div class="side-menu-container" id="sideMenuContainer">
     <div class="side-toggle-btn" onclick="toggleSideMenu()">◀ 快速傳送</div>
@@ -111,7 +96,6 @@
         </div>
     </div>
 
-    <!-- 列表頁 -->
     <div id="home-page" class="page-section active">
         <div style="display:flex; justify-content: space-between; margin-bottom:15px;">
             <button class="btn" onclick="showSection('post-page')">📝 撰寫冒險筆記</button>
@@ -129,7 +113,6 @@
         </table>
     </div>
 
-    <!-- 內文頁 -->
     <div id="view-page" class="page-section">
         <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 返回村莊</button>
         <div style="background:rgba(34,34,34,0.9); padding:20px; border:1px solid #444; border-radius: 4px;">
@@ -152,7 +135,6 @@
         </div>
     </div>
 
-    <!-- 發文頁 -->
     <div id="post-page" class="page-section">
         <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 取消</button>
         <input type="text" id="post-name" placeholder="冒險者名稱" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
@@ -161,7 +143,6 @@
         <button class="btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
-    <!-- 登入 Modal -->
     <div id="login-modal" class="modal"><div class="modal-content">
         <h3>🛡️ 管理員驗證</h3>
         <input type="password" id="login-pass" placeholder="輸入密令" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
@@ -169,7 +150,6 @@
         <button onclick="closeModal('login-modal')" style="width:100%; margin-top:5px; background:#444; color:#fff; border:none; padding:8px;">取消</button>
     </div></div>
 
-    <!-- 修改密碼 Modal -->
     <div id="pw-modal" class="modal"><div class="modal-content">
         <h3>🔑 修改管理密令</h3>
         <input type="password" id="new-pass1" placeholder="輸入新密令" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
@@ -198,29 +178,59 @@
 
     let topicsData = {}, currentTopicId = null, adminPass = "1qaz@WSX";
 
-    // 監聽密碼更新
+    // --- 密碼與基礎邏輯 ---
     configRef.on('value', snap => { if(snap.val()) adminPass = snap.val().password; });
+    function processLogin() { if(document.getElementById('login-pass').value === adminPass) { document.getElementById('body-tag').classList.add('admin-mode'); closeModal('login-modal'); } else alert("密令錯誤"); }
+    function updatePassword() {
+        const p1 = document.getElementById('new-pass1').value, p2 = document.getElementById('new-pass2').value;
+        if(p1 && p1 === p2) { configRef.set({ password: p1 }).then(() => { alert("密令修改成功！"); closeModal('pw-modal'); }); } else alert("密令不一致或為空");
+    }
 
-    // --- NEW 標籤與連結功能 ---
+    // --- NEW 標籤功能 ---
     function markAsRead(id) {
         let readList = JSON.parse(localStorage.getItem('read_topics') || '[]');
         if (!readList.includes(id)) { readList.push(id); localStorage.setItem('read_topics', JSON.stringify(readList)); }
     }
     function isRead(id) { return JSON.parse(localStorage.getItem('read_topics') || '[]').includes(id); }
+
+    // --- 連結偵測與圖片點擊功能 ---
     function linkify(text) {
         const urlPattern = /(https?:\/\/[^\s<]+)/g;
         return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" onclick="return confirmLink('${url}')">${url}</a>`);
     }
     function confirmLink(url) { return confirm("⚠️ 即將前往外部連結？\n\n" + url); }
 
-    // --- 渲染列表 ---
+    // --- 燈箱與圖片移動功能 (回補重點) ---
+    const lb = document.getElementById('image-lightbox'), lbImg = document.getElementById('lightbox-img');
+    let isDragging = false, startX, startY, imgX = 0, imgY = 0;
+
+    document.addEventListener('click', (e) => {
+        if(e.target.tagName === 'IMG' && e.target.id !== 'lightbox-img') {
+            lbImg.src = e.target.src; lb.style.display = 'block';
+            imgX = window.innerWidth/2; imgY = window.innerHeight/2;
+            lbImg.style.transform = `translate(-50%, -50%) translate(${0}px, ${0}px) scale(1)`;
+            imgX = 0; imgY = 0;
+        }
+    });
+
+    lb.onclick = (e) => { if(e.target === lb) lb.style.display = 'none'; };
+
+    lbImg.onmousedown = (e) => { isDragging = true; startX = e.clientX - imgX; startY = e.clientY - imgY; lbImg.style.cursor = 'grabbing'; e.preventDefault(); };
+    window.onmousemove = (e) => {
+        if(!isDragging) return;
+        imgX = e.clientX - startX; imgY = e.clientY - startY;
+        lbImg.style.transform = `translate(-50%, -50%) translate(${imgX}px, ${imgY}px)`;
+    };
+    window.onmouseup = () => { isDragging = false; lbImg.style.cursor = 'grab'; };
+
+    // --- 渲染主題列表 ---
     function renderTopics() {
         const list = document.getElementById('topic-list'); list.innerHTML = '';
         Object.keys(topicsData).reverse().forEach(id => {
             const t = topicsData[id];
-            const rCount = t.replies ? Object.keys(t.replies).length : 0;
             const isWithin24h = (Date.now() - t.time) < (24 * 60 * 60 * 1000);
             const newLabel = (isWithin24h && !isRead(id)) ? `<span class="new-tag">[NEW]</span>` : "";
+            const rCount = t.replies ? Object.keys(t.replies).length : 0;
 
             const row = document.createElement('tr'); row.className = 'topic-row';
             row.innerHTML = `<td><input type="checkbox" class="admin-only admin-checkbox item-check-topic" value="${id}"></td>
@@ -246,16 +256,8 @@
         showSection('view-page');
     }
 
-    // --- 管理功能 ---
-    function processLogin() { if(document.getElementById('login-pass').value === adminPass) { document.getElementById('body-tag').classList.add('admin-mode'); closeModal('login-modal'); } else alert("密令錯誤"); }
-    
-    function updatePassword() {
-        const p1 = document.getElementById('new-pass1').value, p2 = document.getElementById('new-pass2').value;
-        if(p1 && p1 === p2) {
-            configRef.set({ password: p1 }).then(() => { alert("密令修改成功！"); closeModal('pw-modal'); });
-        } else alert("密令不一致或為空");
-    }
-
+    // --- 管理與 Firebase 邏輯 ---
+    topicsRef.on('value', snap => { topicsData = snap.val() || {}; renderTopics(); if(currentTopicId) viewTopic(currentTopicId); });
     function toggleAll(className, src) { document.querySelectorAll('.' + className).forEach(cb => cb.checked = src.checked); }
     function batchDeleteTopics() {
         const sel = document.querySelectorAll('.item-check-topic:checked');
@@ -265,9 +267,6 @@
         const sel = document.querySelectorAll('.item-check-reply:checked');
         if(sel.length && confirm(`確定刪除這 ${sel.length} 則留言？`)) sel.forEach(cb => db.ref(`topics/${currentTopicId}/replies/${cb.value}`).remove());
     }
-
-    // --- 基礎邏輯 ---
-    topicsRef.on('value', snap => { topicsData = snap.val() || {}; renderTopics(); if(currentTopicId) viewTopic(currentTopicId); });
     function submitPost() {
         const n = document.getElementById('post-name').value, t = document.getElementById('post-title').value, c = document.getElementById('post-editor').innerHTML;
         if(n && t && c.trim()) topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => showSection('home-page'));
