@@ -68,6 +68,29 @@
         .side-menu a { display: block; padding: 15px 10px; color: var(--text-accent); text-decoration: none; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(191, 160, 93, 0.2); }
         .side-menu a:hover { background: var(--gold-gradient); color: #000; }
 
+        /* --- NEW 動畫圖示 --- */
+        .new-tag {
+            display: inline-block;
+            background: #ff0000;
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-right: 8px;
+            font-weight: bold;
+            animation: blink 1s infinite alternate;
+        }
+        @keyframes blink {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0.5; transform: scale(0.9); }
+        }
+
+        .reply-count {
+            font-size: 11px;
+            color: #888;
+            margin-left: 5px;
+        }
+
         /* --- UI 佈局 --- */
         .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .forum-header h1 { color: var(--text-accent); margin: 0; font-size: 1.8em; text-shadow: 2px 2px 4px #000; }
@@ -119,11 +142,9 @@
     <div class="forum-header">
         <h1>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</h1>
         <div id="admin-status" style="color: #888; font-size: 12px; margin-top:5px;">冒險者模式</div>
-        <!-- 管理員密碼修改按鈕 (登入後顯示) -->
         <button id="change-pass-btn" class="btn" style="display:none; font-size:11px; padding:5px 10px; margin-top:10px; background:#444; color:#fff;" onclick="openModal('pass-modal')">🔑 修改管理密令</button>
     </div>
 
-    <!-- 列表頁 -->
     <div id="home-page" class="page-section active">
         <div class="action-bar">
             <button class="btn btn-post-main" onclick="showSection('post-page')">📝 撰寫冒險筆記</button>
@@ -138,14 +159,13 @@
                 <tr>
                     <th width="40"><input type="checkbox" id="check-all" class="admin-checkbox" onclick="toggleAll(this)"></th>
                     <th>📜 主題列表</th>
-                    <th width="100">👤 作者</th>
+                    <th width="150">👤 作者</th>
                 </tr>
             </thead>
             <tbody id="topic-list"></tbody>
         </table>
     </div>
 
-    <!-- 內容頁 -->
     <div id="view-page" class="page-section">
         <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 返回村莊</button>
         <div style="background:rgba(34,34,34,0.9); padding:20px; border:1px solid #444;">
@@ -162,7 +182,6 @@
         </div>
     </div>
 
-    <!-- 發佈頁 -->
     <div id="post-page" class="page-section">
         <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 取消</button>
         <input type="text" id="post-name" placeholder="冒險者名稱">
@@ -171,7 +190,6 @@
         <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
-    <!-- 登入彈窗 -->
     <div id="login-modal" class="modal"><div class="modal-content">
         <h3 style="color:var(--text-accent); text-align:center;">🛡️ 管理員驗證</h3>
         <input type="password" id="login-pass" placeholder="密令">
@@ -179,7 +197,6 @@
         <button class="btn" style="width:100%; margin-top:5px; background:#444; color:#fff;" onclick="closeModal('login-modal')">取消</button>
     </div></div>
 
-    <!-- 密碼修改彈窗 -->
     <div id="pass-modal" class="modal"><div class="modal-content">
         <h3 style="color:var(--text-accent); text-align:center;">🔑 修改管理密令</h3>
         <input type="password" id="new-pass" placeholder="輸入新密令">
@@ -193,7 +210,6 @@
 </div>
 
 <script>
-    // --- 0. 環境偵測 ---
     (function() {
         var ua = navigator.userAgent.toLowerCase();
         if (ua.indexOf("line") > -1 || ua.indexOf("fban") > -1 || ua.indexOf("fbav") > -1) {
@@ -205,7 +221,6 @@
         }
     })();
 
-    // --- 1. Firebase 配置 (已套用你的設定) ---
     const firebaseConfig = {
         apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
         authDomain: "game1-7c85c.firebaseapp.com",
@@ -224,14 +239,12 @@
 
     let topicsData = {};
     let currentTopicId = null;
-    let adminPass = "1qaz@WSX"; // 預設密碼
+    let adminPass = "1qaz@WSX";
 
-    // 監聽雲端密碼設定
     configRef.child('adminPass').on('value', (snap) => {
         if(snap.val()) adminPass = snap.val();
     });
 
-    // --- 2. 側邊選單 ---
     function toggleSideMenu() {
         const container = document.getElementById('sideMenuContainer');
         const btn = document.getElementById('sideToggleBtn');
@@ -239,7 +252,6 @@
         btn.innerText = container.classList.contains('hidden') ? "▶ 展開傳送" : "◀ 快速傳送";
     }
 
-    // --- 3. 核心功能 ---
     topicsRef.on('value', (snap) => {
         topicsData = snap.val() || {};
         renderTopics();
@@ -259,12 +271,16 @@
         list.innerHTML = '';
         Object.keys(topicsData).reverse().forEach(id => {
             const t = topicsData[id];
+            const rCount = t.replies ? Object.keys(t.replies).length : 0;
+            const isNew = (Date.now() - t.time) < (24 * 60 * 60 * 1000);
+            const newTag = isNew ? `<span class="new-tag">NEW</span>` : '';
+
             const row = document.createElement('tr');
             row.className = 'topic-row';
             row.innerHTML = `
                 <td><input type="checkbox" class="admin-checkbox item-check" value="${id}"></td>
-                <td onclick="viewTopic('${id}')">${t.title}</td>
-                <td onclick="viewTopic('${id}')">${t.name}</td>
+                <td onclick="viewTopic('${id}')">${newTag}${t.title}</td>
+                <td onclick="viewTopic('${id}')">${t.name} <span class="reply-count">(💬 ${rCount})</span></td>
             `;
             list.appendChild(row);
         });
@@ -288,7 +304,6 @@
         if(!n || !t || !c) return alert("請填寫完整");
         topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => {
             showSection('home-page');
-            // 保留名稱，僅清空標題與內容
             document.getElementById('post-title').value = '';
             document.getElementById('post-content').value = '';
             startCooldown('post-submit-btn', '✅ 確認發佈');
@@ -300,7 +315,6 @@
         const c = document.getElementById('reply-content').value;
         if(!n || !c) return alert("請填寫完整");
         db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => {
-            // 保留稱呼，僅清空內容
             document.getElementById('reply-content').value = '';
             startCooldown('reply-submit-btn', '🏹 送出回覆');
         });
