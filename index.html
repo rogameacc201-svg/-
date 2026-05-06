@@ -91,6 +91,15 @@
             margin-left: 5px;
         }
 
+        /* --- 圖片顯示樣式 --- */
+        .post-img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+            display: block;
+        }
+
         /* --- UI 佈局 --- */
         .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .forum-header h1 { color: var(--text-accent); margin: 0; font-size: 1.8em; text-shadow: 2px 2px 4px #000; }
@@ -177,7 +186,7 @@
         <div id="reply-list" style="margin-top:20px;"></div>
         <div style="background:rgba(40,40,40,0.8); padding:20px; border:1px dashed var(--border-color); margin-top:20px;">
             <input type="text" id="reply-name" placeholder="稱呼">
-            <textarea id="reply-content" placeholder="留言內容..."></textarea>
+            <textarea id="reply-content" placeholder="留言內容... (可直接貼上圖片連結)"></textarea>
             <button class="btn" id="reply-submit-btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
         </div>
     </div>
@@ -186,7 +195,7 @@
         <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 取消</button>
         <input type="text" id="post-name" placeholder="冒險者名稱">
         <input type="text" id="post-title" placeholder="主題">
-        <textarea id="post-content" placeholder="內容..." style="height:200px;"></textarea>
+        <textarea id="post-content" placeholder="內容... (可直接貼上圖片連結)" style="height:200px;"></textarea>
         <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
@@ -252,6 +261,20 @@
         btn.innerText = container.classList.contains('hidden') ? "▶ 展開傳送" : "◀ 快速傳送";
     }
 
+    // --- 自動偵測網址並將圖片網址轉為圖片顯示 ---
+    function formatContent(text) {
+        if (!text) return "";
+        // 匹配 http/https 開頭的網址
+        const urlPattern = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlPattern, function(url) {
+            // 檢查是否為圖片副檔名
+            if (url.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i)) {
+                return `<br><img src="${url}" class="post-img" onerror="this.style.display='none'"><br>`;
+            }
+            return `<a href="${url}" target="_blank" style="color:var(--text-accent)">${url}</a>`;
+        });
+    }
+
     topicsRef.on('value', (snap) => {
         topicsData = snap.val() || {};
         renderTopics();
@@ -266,13 +289,11 @@
         });
     }
 
-    // --- 新增：讀取已看過的文章清單 ---
     function getReadList() {
         const list = localStorage.getItem('readTopics');
         return list ? JSON.parse(list) : [];
     }
 
-    // --- 新增：將文章標記為已讀 ---
     function markAsRead(id) {
         let list = getReadList();
         if (!list.includes(id)) {
@@ -289,13 +310,8 @@
         Object.keys(topicsData).reverse().forEach(id => {
             const t = topicsData[id];
             const rCount = t.replies ? Object.keys(t.replies).length : 0;
-            
-            // 判斷是否為 24 小時內發佈
             const isRecent = (Date.now() - t.time) < (24 * 60 * 60 * 1000);
-            // 判斷是否「未讀過」
             const isUnread = !readList.includes(id);
-            
-            // 只有「24小時內」且「未讀過」才顯示 NEW
             const newTag = (isRecent && isUnread) ? `<span class="new-tag">NEW</span>` : '';
 
             const row = document.createElement('tr');
@@ -348,19 +364,21 @@
         const t = topicsData[id];
         if(!t) return;
 
-        // --- 新增：進入主題時標記為已讀並刷新列表狀態 ---
         markAsRead(id);
         renderTopics(); 
 
         document.getElementById('display-title').innerText = t.title;
         document.getElementById('display-author').innerText = "筆記者：" + t.name;
-        document.getElementById('display-content').innerText = t.content;
+        // 使用 formatContent 來渲染 HTML (支援圖片)
+        document.getElementById('display-content').innerHTML = formatContent(t.content);
+        
         const rList = document.getElementById('reply-list');
         rList.innerHTML = '';
         if(t.replies) Object.values(t.replies).forEach(r => {
             const d = document.createElement('div');
             d.className = 'reply-box';
-            d.innerHTML = `<small style="color:var(--border-color)">${r.name}：</small><br>${r.content}`;
+            // 同樣對留言使用 formatContent
+            d.innerHTML = `<small style="color:var(--border-color)">${r.name}：</small><br>${formatContent(r.content)}`;
             rList.appendChild(d);
         });
         showSection('view-page');
