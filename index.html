@@ -51,12 +51,23 @@
         th { background: rgba(44, 44, 44, 0.9); color: var(--border-color); padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color); }
         td { padding: 15px 12px; border-bottom: 1px solid #333; }
         .topic-row:hover { background-color: rgba(42, 34, 21, 0.8); cursor: pointer; }
+        
+        /* 預設隱藏管理組件 */
         .admin-checkbox { display: none; transform: scale(1.2); margin-right: 10px; }
+        #admin-status { display: none; color: var(--text-accent); font-size: 12px; margin-top: 5px; font-weight: bold; }
+        #change-pass-btn { display: none; font-size: 11px; margin-top: 10px; background: #444; color: #fff; }
+
         body.admin-mode .admin-checkbox { display: inline-block; }
+        body.admin-mode #admin-status { display: block; }
+        body.admin-mode #change-pass-btn { display: inline-block; }
+
         input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; }
         .page-section { display: none; }
         .page-section.active { display: block; }
         .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 15px; margin-top: 10px; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; }
     </style>
 </head>
 <body id="body-tag">
@@ -81,9 +92,9 @@
 <div class="container">
     <div class="forum-header">
         <h1>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</h1>
-        <div id="admin-status" style="color: #888; font-size: 12px; margin-top:5px;">冒險者模式</div>
-        <!-- 初始隱藏修改密令按鈕 -->
-        <button id="change-pass-btn" class="btn" style="display:none; font-size:11px; margin-top:10px; background:#444; color:#fff;" onclick="openModal('pass-modal')">🔑 修改管理密令</button>
+        <!-- 管理員相關元素預設皆由 CSS 隱藏 -->
+        <div id="admin-status">🔱 管理權限已開啟</div>
+        <button id="change-pass-btn" class="btn" onclick="openModal('pass-modal')">🔑 修改管理密令</button>
     </div>
 
     <div id="home-page" class="page-section active">
@@ -94,7 +105,7 @@
         <table class="forum-table">
             <thead>
                 <tr>
-                    <th width="40"><input type="checkbox" id="check-all" class="admin-checkbox" onclick="toggleAll(this)"></th>
+                    <th width="40" class="admin-checkbox-header"><input type="checkbox" id="check-all" class="admin-checkbox" onclick="toggleAll(this)"></th>
                     <th>📜 主題列表</th>
                     <th width="150">👤 作者</th>
                 </tr>
@@ -129,7 +140,7 @@
         <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
-    <!-- 管理登入 -->
+    <!-- 管理登入 Modal -->
     <div id="login-modal" class="modal"><div class="modal-content">
         <h3 style="color:var(--text-accent); text-align:center;">🛡️ 管理員驗證</h3>
         <input type="password" id="login-pass" placeholder="密令">
@@ -225,7 +236,7 @@
             const isUnread = !readList.includes(id);
             const isRecent = (Date.now() - t.time) < 86400000;
             const newTag = (isRecent && isUnread) ? `<span class="new-tag">NEW</span>` : '';
-            const rCount = t.replies ? Object.keys(t.replies).length : 0; // 恢復計算留言數
+            const rCount = t.replies ? Object.keys(t.replies).length : 0;
             const row = document.createElement('tr');
             row.className = 'topic-row';
             row.innerHTML = `
@@ -274,15 +285,15 @@
     }
     function toggleSideMenu() { document.getElementById('sideMenuContainer').classList.toggle('hidden'); }
     function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='home-page') currentTopicId=null; }
+    
     function processLogin() {
         if(document.getElementById('login-pass').value === adminPass) {
             document.getElementById('body-tag').classList.add('admin-mode');
             document.getElementById('batch-del-btn').style.display = 'block';
-            document.getElementById('change-pass-btn').style.display = 'inline-block';
-            document.getElementById('admin-status').innerText = "🔱 管理權限已開啟";
             closeModal('login-modal');
         } else alert("密令錯誤");
     }
+
     function updatePassword() { const newP = document.getElementById('new-pass').value; if(newP.length < 4) return alert("太短"); configRef.update({ adminPass: newP }).then(() => { alert("已更新"); closeModal('pass-modal'); }); }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
