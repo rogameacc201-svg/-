@@ -24,33 +24,30 @@
         body { background-color: var(--bg-color); color: var(--text-main); font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding: 10px; min-height: 100vh; }
         .container { max-width: 900px; margin: 0 auto; }
 
-        /* 內容顯示與超連結樣式 */
-        #display-content, .reply-box { 
-            white-space: pre-wrap; 
-            word-break: break-all; 
-            line-height: 1.6;
-            font-size: 16px;
+        /* NEW 標籤樣式 */
+        .new-tag {
+            color: #ff3300;
+            font-weight: bold;
+            font-style: italic;
+            margin-right: 8px;
+            text-shadow: 0 0 5px rgba(255, 51, 0, 0.5);
+            animation: flash 1.5s infinite;
         }
-        #display-content a, .reply-box a {
-            color: var(--link-color);
-            text-decoration: underline;
-            cursor: pointer;
-        }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* 圖片與燈箱 */
-        img { cursor: zoom-in; max-width: 100%; height: auto; }
+        /* 內容顯示與超連結 */
+        #display-content, .reply-box { white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 16px; }
+        #display-content a, .reply-box a { color: var(--link-color); text-decoration: underline; cursor: pointer; }
+        img { cursor: zoom-in; max-width: 100%; height: auto; display: block; margin: 10px 0; border: 1px solid var(--border-color); }
+
+        /* 燈箱 */
         .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 10000; overflow: hidden; touch-action: none; }
         #lightbox-img { position: absolute; max-width: 90%; max-height: 90%; transition: transform 0.1s ease-out; cursor: grab; user-select: none; }
-        #lightbox-img:active { cursor: grabbing; }
 
         /* 編輯器 */
-        .rich-editor { 
-            width: 100%; min-height: 150px; padding: 12px; background: var(--input-bg); 
-            border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; 
-            overflow-y: auto; white-space: pre-wrap; word-break: break-all; outline: none;
-        }
+        .rich-editor { width: 100%; min-height: 150px; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; outline: none; white-space: pre-wrap; word-break: break-all; }
 
-        /* 介面組件 */
+        /* 介面表格 */
         .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; }
         .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; }
         .forum-table { width: 100%; border-collapse: collapse; background: rgba(21, 21, 21, 0.9); }
@@ -60,7 +57,7 @@
         .page-section { display: none; }
         .page-section.active { display: block; }
         .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 15px; margin-top: 10px; }
-        
+
         /* 側邊選單 */
         .side-menu-container { position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9999; display: flex; align-items: center; transition: transform 0.4s; }
         .side-menu-container.hidden { transform: translateY(-50%) translateX(102px); }
@@ -68,7 +65,6 @@
         .side-menu { background: rgba(20, 20, 20, 0.95); border: 2px solid var(--border-color); border-right: none; width: 100px; }
         .side-menu a { display: block; padding: 15px 10px; color: var(--text-accent); text-decoration: none; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(191, 160, 93, 0.2); }
 
-        /* 管理模式 */
         .admin-checkbox { display: none; }
         body.admin-mode .admin-checkbox { display: inline-block; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
@@ -92,9 +88,10 @@
 <div class="container">
     <div class="forum-header">
         <h1>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</h1>
-        <div id="admin-status" style="display:none; color:var(--text-accent);">🔱 管理權限已開啟</div>
+        <div id="admin-status" style="display:none; color:var(--text-accent); font-weight:bold;">🔱 管理權限已開啟</div>
     </div>
 
+    <!-- 列表頁 -->
     <div id="home-page" class="page-section active">
         <div style="display:flex; justify-content: space-between; margin-bottom:15px;">
             <button class="btn" onclick="showSection('post-page')">📝 撰寫冒險筆記</button>
@@ -112,6 +109,7 @@
         </table>
     </div>
 
+    <!-- 內文頁 -->
     <div id="view-page" class="page-section">
         <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 返回村莊</button>
         <div style="background:rgba(34,34,34,0.9); padding:20px; border:1px solid #444;">
@@ -122,20 +120,22 @@
         </div>
         <div id="reply-list"></div>
         <div style="background:rgba(40,40,40,0.8); padding:20px; border:1px dashed var(--border-color); margin-top:20px;">
-            <input type="text" id="reply-name" placeholder="稱呼" style="width:100%; padding:10px; margin-bottom:10px;">
+            <input type="text" id="reply-name" placeholder="稱呼" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
             <div id="reply-editor" class="rich-editor" contenteditable="true"></div>
             <button class="btn" id="reply-submit-btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
         </div>
     </div>
 
+    <!-- 發文頁 -->
     <div id="post-page" class="page-section">
         <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 取消</button>
-        <input type="text" id="post-name" placeholder="冒險者名稱" style="width:100%; padding:10px; margin-bottom:10px;">
-        <input type="text" id="post-title" placeholder="主題" style="width:100%; padding:10px; margin-bottom:10px;">
+        <input type="text" id="post-name" placeholder="冒險者名稱" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
+        <input type="text" id="post-title" placeholder="主題" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
         <div id="post-editor" class="rich-editor" contenteditable="true" style="height:300px;"></div>
         <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
+    <!-- 管理登入 Modal -->
     <div id="login-modal" class="modal"><div class="modal-content">
         <h3>🛡️ 管理員驗證</h3>
         <input type="password" id="login-pass" placeholder="輸入密令" style="width:100%; padding:10px; margin-bottom:10px;">
@@ -167,73 +167,38 @@
     const lb = document.getElementById('image-lightbox');
     const lbImg = document.getElementById('lightbox-img');
 
-    // --- 超連結偵測與安全提示功能 ---
+    // --- 超連結偵測 ---
     function linkify(text) {
-        // 匹配 http/https 連結
         const urlPattern = /(https?:\/\/[^\s<]+)/g;
-        return text.replace(urlPattern, function(url) {
-            // 返回帶有 onclick 提示的連結
-            return `<a href="${url}" target="_blank" onclick="return confirmLink('${url}')">${url}</a>`;
-        });
+        return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" onclick="return confirmLink('${url}')">${url}</a>`);
     }
+    function confirmLink(url) { return confirm("⚠️ 冒險提醒：即將離開討論區前往外部連結？\n\n" + url); }
 
-    function confirmLink(url) {
-        return confirm("⚠️ 冒險提醒：即將離開討論區前往外部網站：\n\n" + url + "\n\n是否確定前往？");
-    }
-
-    // --- 燈箱功能 ---
-    document.addEventListener('click', (e) => {
-        if (e.target.tagName === 'IMG' && !e.target.closest('.rich-editor')) {
-            lbImg.src = e.target.src;
-            scale = 1; moveX = 0; moveY = 0;
-            updateImgTransform();
-            lb.style.display = 'flex';
-            centerImg();
-        }
-    });
-
-    lb.addEventListener('click', (e) => { if (e.target === lb) lb.style.display = 'none'; });
-
-    function updateImgTransform() { lbImg.style.transform = `translate(${moveX}px, ${moveY}px) scale(${scale})`; }
-    function centerImg() {
-        lbImg.style.left = '50%'; lbImg.style.top = '50%';
-        lbImg.style.marginLeft = `-${lbImg.offsetWidth / 2}px`;
-        lbImg.style.marginTop = `-${lbImg.offsetHeight / 2}px`;
-        updateImgTransform();
-    }
-
-    lb.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        scale = Math.min(Math.max(0.3, scale + (e.deltaY > 0 ? -0.2 : 0.2)), 8);
-        updateImgTransform();
-    }, { passive: false });
-
-    lbImg.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - moveX; startY = e.clientY - moveY; lbImg.style.transition = 'none'; });
-    window.addEventListener('mousemove', (e) => { if (!isDragging) return; moveX = e.clientX - startX; moveY = e.clientY - startY; updateImgTransform(); });
-    window.addEventListener('mouseup', () => { isDragging = false; lbImg.style.transition = 'transform 0.1s ease-out'; });
-
-    // --- 討論區數據處理 ---
-    topicsRef.on('value', (snap) => { topicsData = snap.val() || {}; renderTopics(); if(currentTopicId) viewTopic(currentTopicId); });
-
+    // --- 列表渲染 (含 NEW 標籤邏輯) ---
     function renderTopics() {
         const list = document.getElementById('topic-list'); list.innerHTML = '';
         Object.keys(topicsData).reverse().forEach(id => {
             const t = topicsData[id];
             const rCount = t.replies ? Object.keys(t.replies).length : 0;
+            
+            // 判斷是否為 24 小時內的新文章
+            const isNew = (Date.now() - t.time) < (24 * 60 * 60 * 1000);
+            const newLabel = isNew ? `<span class="new-tag">[NEW]</span>` : "";
+
             const row = document.createElement('tr');
             row.className = 'topic-row';
             row.innerHTML = `<td><input type="checkbox" class="admin-checkbox item-check" value="${id}"></td>
-                             <td onclick="viewTopic('${id}')">${t.title}</td>
+                             <td onclick="viewTopic('${id}')">${newLabel}${t.title}</td>
                              <td onclick="viewTopic('${id}')">${t.name} <span style="font-size:11px; color:#888;">(💬 ${rCount})</span></td>`;
             list.appendChild(row);
         });
     }
 
+    // --- 內文查看 ---
     function viewTopic(id) {
         currentTopicId = id; const t = topicsData[id];
         document.getElementById('display-title').innerText = t.title;
         document.getElementById('display-author').innerText = "筆記者：" + t.name;
-        // 渲染時加入 linkify 處理
         document.getElementById('display-content').innerHTML = linkify(t.content);
         
         const rList = document.getElementById('reply-list'); rList.innerHTML = '';
@@ -245,28 +210,35 @@
         showSection('view-page');
     }
 
+    // --- Firebase 資料同步 ---
+    topicsRef.on('value', (snap) => { topicsData = snap.val() || {}; renderTopics(); if(currentTopicId) viewTopic(currentTopicId); });
+
     async function submitPost() {
         const n = document.getElementById('post-name').value, t = document.getElementById('post-title').value, c = document.getElementById('post-editor').innerHTML;
-        if(!n || !t || !c.trim()) return alert("請填寫內容");
+        if(!n || !t || !c.trim()) return alert("內容未填寫完成");
         topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => {
-            showSection('home-page'); document.getElementById('post-editor').innerHTML = '';
+            showSection('home-page'); 
+            document.getElementById('post-name').value = '';
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-editor').innerHTML = '';
         });
     }
 
     async function submitReply() {
         const n = document.getElementById('reply-name').value, c = document.getElementById('reply-editor').innerHTML;
-        if(!n || !c.trim()) return alert("請輸入內容");
+        if(!n || !c.trim()) return alert("請輸入稱呼與內容");
         db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => {
             document.getElementById('reply-editor').innerHTML = '';
         });
     }
 
-    function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='home-page') currentTopicId=null; }
+    // --- 介面控制 ---
+    function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='home-page') currentTopicId=null; window.scrollTo(0,0); }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function toggleSideMenu() { document.getElementById('sideMenuContainer').classList.toggle('hidden'); }
     function toggleAll(src) { document.querySelectorAll('.item-check').forEach(cb => cb.checked = src.checked); }
-    function batchDelete() { const sel = document.querySelectorAll('.item-check:checked'); if(sel.length && confirm('確定刪除選中主題？')) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove()); }
+    function batchDelete() { const sel = document.querySelectorAll('.item-check:checked'); if(sel.length && confirm('確定要將選中的冒險筆記刪除？')) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove()); }
     function processLogin() {
         if(document.getElementById('login-pass').value === adminPass) {
             document.getElementById('body-tag').classList.add('admin-mode');
@@ -275,6 +247,17 @@
             closeModal('login-modal');
         } else alert("密令錯誤");
     }
+
+    // --- 燈箱邏輯 ---
+    document.addEventListener('click', (e) => {
+        if (e.target.tagName === 'IMG' && !e.target.closest('.rich-editor')) {
+            lbImg.src = e.target.src; scale = 1; moveX = 0; moveY = 0;
+            lb.style.display = 'flex';
+            lbImg.style.left = '50%'; lbImg.style.top = '50%';
+            lbImg.style.transform = `translate(-50%, -50%) scale(1)`;
+        }
+    });
+    lb.addEventListener('click', (e) => { if (e.target === lb) lb.style.display = 'none'; });
 </script>
 </body>
 </html>
