@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</title>
     
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     
@@ -31,23 +30,20 @@
         .side-menu { background: rgba(20, 20, 20, 0.95); border: 2px solid var(--border-color); border-right: none; width: 100px; }
         .side-menu a { display: block; padding: 15px 10px; color: var(--text-accent); text-decoration: none; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(191, 160, 93, 0.2); }
         
-        /* 圖片樣式 */
+        /* 圖片與燈箱 */
         .post-img { max-width: 100%; height: auto; margin-top: 10px; border: 1px solid var(--border-color); cursor: zoom-in; }
+        .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; overflow: hidden; }
+        #lightbox-img { max-width: 90%; max-height: 90%; transition: transform 0.1s ease-out; cursor: grab; }
 
-        /* 燈箱與縮放 */
-        .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; overflow: hidden; }
-        #lightbox-img { max-width: 90%; max-height: 90%; transition: transform 0.2s ease; cursor: grab; transform-origin: center; }
-        #lightbox-img:active { cursor: grabbing; }
-
-        /* 編輯器樣式 (取代 Textarea) */
+        /* 編輯器 */
         .rich-editor { 
             width: 100%; min-height: 150px; padding: 12px; background: var(--input-bg); 
             border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; 
-            overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+            overflow-y: auto; white-space: pre-wrap; word-break: break-all; outline: none;
         }
-        .rich-editor img { max-width: 200px; border: 1px solid var(--border-color); margin: 5px; }
+        .rich-editor img { max-width: 150px; border: 1px solid var(--border-color); margin: 5px; vertical-align: bottom; }
 
-        /* 管理組件隱藏 */
+        /* 管理組件 */
         .admin-checkbox { display: none; transform: scale(1.2); margin-right: 10px; }
         #admin-status { display: none; color: var(--text-accent); font-size: 12px; margin-top: 5px; font-weight: bold; }
         #change-pass-btn { display: none; font-size: 11px; margin-top: 10px; background: #444; color: #fff; }
@@ -70,7 +66,6 @@
 </head>
 <body id="body-tag">
 
-<!-- 支援縮放的燈箱 -->
 <div id="image-lightbox" class="lightbox" onclick="closeLightbox()">
     <img id="lightbox-img" src="" onclick="event.stopPropagation()">
 </div>
@@ -98,7 +93,7 @@
         <table class="forum-table">
             <thead>
                 <tr>
-                    <th width="40"><input type="checkbox" class="admin-checkbox" onclick="toggleAll(this)"></th>
+                    <th width="40"><input type="checkbox" class="admin-checkbox" id="check-all" onclick="toggleAll(this)"></th>
                     <th>📜 主題列表</th>
                     <th width="150">👤 作者</th>
                 </tr>
@@ -118,7 +113,7 @@
         <div id="reply-list"></div>
         <div style="background:rgba(40,40,40,0.8); padding:20px; border:1px dashed var(--border-color); margin-top:20px;">
             <input type="text" id="reply-name" placeholder="稱呼">
-            <div id="reply-editor" class="rich-editor" contenteditable="true" placeholder="直接在此貼上圖片或輸入文字..."></div>
+            <div id="reply-editor" class="rich-editor" contenteditable="true"></div>
             <button class="btn" id="reply-submit-btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
         </div>
     </div>
@@ -131,28 +126,26 @@
         <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
-    <!-- Modals -->
     <div id="login-modal" class="modal"><div class="modal-content">
         <h3>🛡️ 管理員驗證</h3>
-        <input type="password" id="login-pass">
+        <input type="password" id="login-pass" placeholder="輸入密令">
         <button class="btn" onclick="processLogin()" style="width:100%;">登入</button>
-        <button onclick="closeModal('login-modal')" style="width:100%; margin-top:5px;">取消</button>
+        <button onclick="closeModal('login-modal')" style="width:100%; margin-top:5px; background:#444; color:#fff; border:none; padding:8px;">取消</button>
     </div></div>
 
     <div id="pass-modal" class="modal"><div class="modal-content">
         <h3>🔑 修改密令</h3>
         <input type="password" id="new-pass">
         <button class="btn" onclick="updatePassword()" style="width:100%;">確認變更</button>
-        <button onclick="closeModal('pass-modal')" style="width:100%; margin-top:5px;">關閉</button>
+        <button onclick="closeModal('pass-modal')" style="width:100%; margin-top:5px; background:#444; color:#fff; border:none; padding:8px;">關閉</button>
     </div></div>
 
     <div style="text-align:center; padding:20px; color:#666; font-size:12px;">
-        系統版本：3.8 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span>
+        系統版本：3.8 亞丁雲端版 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span>
     </div>
 </div>
 
 <script>
-    // Firebase 配置 (保持不變)
     const firebaseConfig = {
         apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
         authDomain: "game1-7c85c.firebaseapp.com",
@@ -172,7 +165,7 @@
 
     configRef.child('adminPass').on('value', (snap) => { if(snap.val()) adminPass = snap.val(); });
 
-    // --- 燈箱縮放功能 ---
+    // --- 燈箱與縮放 ---
     function openLightbox(src) {
         const lb = document.getElementById('image-lightbox');
         const img = document.getElementById('lightbox-img');
@@ -181,31 +174,28 @@
         img.style.transform = `scale(${scale})`;
         lb.style.display = 'flex';
     }
-
     function closeLightbox() { document.getElementById('image-lightbox').style.display = 'none'; }
 
-    // 滾輪縮放邏輯
     document.getElementById('image-lightbox').addEventListener('wheel', (e) => {
         e.preventDefault();
         const img = document.getElementById('lightbox-img');
-        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        scale = Math.min(Math.max(0.5, scale + delta), 3); // 限制縮放範圍 0.5x ~ 3x
+        const delta = e.deltaY > 0 ? -0.2 : 0.2;
+        scale = Math.min(Math.max(0.5, scale + delta), 5);
         img.style.transform = `scale(${scale})`;
     });
 
-    // --- 內容處理 ---
+    // --- 內容格式化（確保點擊有效） ---
     function formatContent(html) {
-        // 將 HTML 字串轉為含有放大功能的內容
         const div = document.createElement('div');
         div.innerHTML = html;
         div.querySelectorAll('img').forEach(img => {
             img.className = 'post-img';
-            img.onclick = () => openLightbox(img.src);
+            img.onclick = (e) => { e.stopPropagation(); openLightbox(img.src); };
         });
         return div.innerHTML;
     }
 
-    // --- Firebase 互動 ---
+    // --- 列表渲染 ---
     topicsRef.on('value', (snap) => { topicsData = snap.val() || {}; renderTopics(); if(currentTopicId) viewTopic(currentTopicId); });
 
     function renderTopics() {
@@ -227,7 +217,7 @@
     function viewTopic(id) {
         currentTopicId = id; const t = topicsData[id];
         document.getElementById('display-title').innerText = t.title;
-        document.getElementById('display-author').innerText = "作者：" + t.name;
+        document.getElementById('display-author').innerText = "筆記者：" + t.name;
         document.getElementById('display-content').innerHTML = formatContent(t.content);
         const rList = document.getElementById('reply-list'); rList.innerHTML = '';
         if(t.replies) Object.values(t.replies).forEach(r => {
@@ -238,9 +228,10 @@
         showSection('view-page');
     }
 
+    // --- 發文與回覆 ---
     async function submitPost() {
         const n = document.getElementById('post-name').value, t = document.getElementById('post-title').value, c = document.getElementById('post-editor').innerHTML;
-        if(!n || !t || !c) return alert("請填寫內容");
+        if(!n || !t || !c.trim()) return alert("請填寫內容");
         topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => {
             showSection('home-page'); document.getElementById('post-editor').innerHTML = '';
         });
@@ -248,27 +239,31 @@
 
     async function submitReply() {
         const n = document.getElementById('reply-name').value, c = document.getElementById('reply-editor').innerHTML;
-        if(!n || !c) return alert("請填寫回覆");
+        if(!n || !c.trim()) return alert("請輸入內容");
         db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => {
             document.getElementById('reply-editor').innerHTML = '';
         });
     }
 
-    // --- 基礎 UI 功能 ---
-    function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    // --- 功能邏輯 ---
+    function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='home-page') currentTopicId=null; }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function toggleSideMenu() { document.getElementById('sideMenuContainer').classList.toggle('hidden'); }
+    function toggleAll(src) { document.querySelectorAll('.item-check').forEach(cb => cb.checked = src.checked); }
+    function batchDelete() { const sel = document.querySelectorAll('.item-check:checked'); if(sel.length && confirm('確定刪除選中項？')) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove()); }
+    
     function processLogin() {
         if(document.getElementById('login-pass').value === adminPass) {
             document.getElementById('body-tag').classList.add('admin-mode');
             document.getElementById('batch-del-btn').style.display = 'block';
             closeModal('login-modal');
-        } else alert("錯誤");
+        } else alert("密令錯誤");
     }
-    function toggleAll(src) { document.querySelectorAll('.item-check').forEach(cb => cb.checked = src.checked); }
-    function batchDelete() { const sel = document.querySelectorAll('.item-check:checked'); if(sel.length && confirm('刪除？')) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove()); }
-    function updatePassword() { const newP = document.getElementById('new-pass').value; configRef.update({ adminPass: newP }).then(() => { alert("已更新"); closeModal('pass-modal'); }); }
+    function updatePassword() { 
+        const newP = document.getElementById('new-pass').value;
+        if(newP) configRef.update({ adminPass: newP }).then(() => { alert("已更新"); closeModal('pass-modal'); });
+    }
 </script>
 </body>
 </html>
