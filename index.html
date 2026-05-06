@@ -24,65 +24,59 @@
         body { background-color: var(--bg-color); color: var(--text-main); font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding: 10px; min-height: 100vh; }
         .container { max-width: 900px; margin: 0 auto; }
 
-        /* --- 側邊選單與標籤 --- */
+        /* 側邊選單 */
         .side-menu-container { position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9999; display: flex; align-items: center; transition: transform 0.4s; }
         .side-menu-container.hidden { transform: translateY(-50%) translateX(102px); }
         .side-toggle-btn { background: var(--header-bg); border: 2px solid var(--border-color); border-right: none; color: var(--text-accent); padding: 15px 6px; cursor: pointer; border-radius: 8px 0 0 8px; font-size: 12px; writing-mode: vertical-rl; }
         .side-menu { background: rgba(20, 20, 20, 0.95); border: 2px solid var(--border-color); border-right: none; width: 100px; }
         .side-menu a { display: block; padding: 15px 10px; color: var(--text-accent); text-decoration: none; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(191, 160, 93, 0.2); }
-        .new-tag { display: inline-block; background: #ff0000; color: white; font-size: 10px; padding: 2px 5px; border-radius: 3px; margin-right: 8px; animation: blink 1s infinite alternate; }
-        @keyframes blink { from { opacity: 1; } to { opacity: 0.5; } }
-
-        /* --- 圖片與預覽 --- */
-        .post-img { max-width: 100%; height: auto; margin-top: 10px; border: 1px solid var(--border-color); cursor: zoom-in; display: block; }
-        .preview-area { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; min-height: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px; }
-        .preview-img { width: 80px; height: 80px; object-fit: cover; border: 1px solid #555; }
-
-        /* --- 燈箱 --- */
-        .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; flex-direction: column; }
-        .lightbox img { max-width: 90%; max-height: 80%; border: 2px solid var(--border-color); }
-        .lightbox-controls { margin-top: 20px; display: flex; gap: 15px; }
-
-        /* --- UI 樣式 --- */
-        .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; }
-        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; }
-        .btn:disabled { background: #555; color: #aaa; filter: grayscale(1); }
-        .forum-table { width: 100%; border-collapse: collapse; background: rgba(21, 21, 21, 0.9); }
-        th { background: rgba(44, 44, 44, 0.9); color: var(--border-color); padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color); }
-        td { padding: 15px 12px; border-bottom: 1px solid #333; }
-        .topic-row:hover { background-color: rgba(42, 34, 21, 0.8); cursor: pointer; }
         
-        /* 預設隱藏管理組件 */
+        /* 圖片樣式 */
+        .post-img { max-width: 100%; height: auto; margin-top: 10px; border: 1px solid var(--border-color); cursor: zoom-in; }
+
+        /* 燈箱與縮放 */
+        .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; overflow: hidden; }
+        #lightbox-img { max-width: 90%; max-height: 90%; transition: transform 0.2s ease; cursor: grab; transform-origin: center; }
+        #lightbox-img:active { cursor: grabbing; }
+
+        /* 編輯器樣式 (取代 Textarea) */
+        .rich-editor { 
+            width: 100%; min-height: 150px; padding: 12px; background: var(--input-bg); 
+            border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; 
+            overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+        }
+        .rich-editor img { max-width: 200px; border: 1px solid var(--border-color); margin: 5px; }
+
+        /* 管理組件隱藏 */
         .admin-checkbox { display: none; transform: scale(1.2); margin-right: 10px; }
         #admin-status { display: none; color: var(--text-accent); font-size: 12px; margin-top: 5px; font-weight: bold; }
         #change-pass-btn { display: none; font-size: 11px; margin-top: 10px; background: #444; color: #fff; }
-
-        body.admin-mode .admin-checkbox { display: inline-block; }
+        body.admin-mode .admin-checkbox, body.admin-mode #admin-status, body.admin-mode #change-pass-btn { display: inline-block; }
         body.admin-mode #admin-status { display: block; }
-        body.admin-mode #change-pass-btn { display: inline-block; }
 
-        input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; }
+        .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; }
+        .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; }
+        .forum-table { width: 100%; border-collapse: collapse; background: rgba(21, 21, 21, 0.9); }
+        th { background: rgba(44, 44, 44, 0.9); color: var(--border-color); padding: 12px; border-bottom: 2px solid var(--border-color); }
+        td { padding: 15px 12px; border-bottom: 1px solid #333; }
+        .topic-row:hover { background-color: rgba(42, 34, 21, 0.8); cursor: pointer; }
         .page-section { display: none; }
         .page-section.active { display: block; }
         .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 15px; margin-top: 10px; }
-        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; }
     </style>
 </head>
 <body id="body-tag">
 
-<!-- 圖片放大檢視層 -->
+<!-- 支援縮放的燈箱 -->
 <div id="image-lightbox" class="lightbox" onclick="closeLightbox()">
     <img id="lightbox-img" src="" onclick="event.stopPropagation()">
-    <div class="lightbox-controls" onclick="event.stopPropagation()">
-        <button class="btn" id="download-btn">⬇️ 下載圖片</button>
-        <button class="btn" style="background:#444; color:#fff;" onclick="closeLightbox()">❌ 關閉</button>
-    </div>
 </div>
 
 <div class="side-menu-container" id="sideMenuContainer">
-    <div class="side-toggle-btn" onclick="toggleSideMenu()" id="sideToggleBtn">◀ 快速傳送</div>
+    <div class="side-toggle-btn" onclick="toggleSideMenu()">◀ 快速傳送</div>
     <nav class="side-menu">
         <a href="https://rogameacc201-svg.github.io/my-auction/" target="_blank">💰 拍賣場</a>
         <a href="https://rogameacc201-svg.github.io/-/" target="_blank">💬 討論區</a>
@@ -92,20 +86,19 @@
 <div class="container">
     <div class="forum-header">
         <h1>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</h1>
-        <!-- 管理員相關元素預設皆由 CSS 隱藏 -->
         <div id="admin-status">🔱 管理權限已開啟</div>
         <button id="change-pass-btn" class="btn" onclick="openModal('pass-modal')">🔑 修改管理密令</button>
     </div>
 
     <div id="home-page" class="page-section active">
-        <div class="action-bar" style="display:flex; justify-content: space-between; align-items:center; margin-bottom:15px;">
+        <div style="display:flex; justify-content: space-between; margin-bottom:15px;">
             <button class="btn" onclick="showSection('post-page')">📝 撰寫冒險筆記</button>
             <button id="batch-del-btn" class="btn" onclick="batchDelete()" style="background:#a30000; color:#fff; display:none;">🗑️ 批次刪除</button>
         </div>
         <table class="forum-table">
             <thead>
                 <tr>
-                    <th width="40" class="admin-checkbox-header"><input type="checkbox" id="check-all" class="admin-checkbox" onclick="toggleAll(this)"></th>
+                    <th width="40"><input type="checkbox" class="admin-checkbox" onclick="toggleAll(this)"></th>
                     <th>📜 主題列表</th>
                     <th width="150">👤 作者</th>
                 </tr>
@@ -120,47 +113,46 @@
             <h2 id="display-title" style="color:var(--text-accent); margin:0;"></h2>
             <div id="display-author" style="color:#88bcff; font-size:13px; margin-top:5px;"></div>
             <hr style="border:0; border-top:1px solid #444; margin:15px 0;">
-            <div id="display-content" style="white-space: pre-wrap;"></div>
+            <div id="display-content"></div>
         </div>
         <div id="reply-list"></div>
         <div style="background:rgba(40,40,40,0.8); padding:20px; border:1px dashed var(--border-color); margin-top:20px;">
-            <div id="reply-preview" class="preview-area">預覽區 (貼上圖片後顯示)</div>
             <input type="text" id="reply-name" placeholder="稱呼">
-            <textarea id="reply-content" placeholder="內容... (直接貼上圖片)" oninput="updatePreview('reply-content', 'reply-preview')"></textarea>
+            <div id="reply-editor" class="rich-editor" contenteditable="true" placeholder="直接在此貼上圖片或輸入文字..."></div>
             <button class="btn" id="reply-submit-btn" onclick="submitReply()" style="width:100%;">🏹 送出回覆</button>
         </div>
     </div>
 
     <div id="post-page" class="page-section">
         <button class="btn" style="width:100%; margin-bottom:15px; background:#444; color:#fff;" onclick="showSection('home-page')">⬅️ 取消</button>
-        <div id="post-preview" class="preview-area">預覽區 (貼上圖片後顯示)</div>
         <input type="text" id="post-name" placeholder="冒險者名稱">
         <input type="text" id="post-title" placeholder="主題">
-        <textarea id="post-content" placeholder="內容... (直接貼上圖片)" style="height:200px;" oninput="updatePreview('post-content', 'post-preview')"></textarea>
+        <div id="post-editor" class="rich-editor" contenteditable="true" style="height:300px;"></div>
         <button class="btn" id="post-submit-btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
-    <!-- 管理登入 Modal -->
+    <!-- Modals -->
     <div id="login-modal" class="modal"><div class="modal-content">
-        <h3 style="color:var(--text-accent); text-align:center;">🛡️ 管理員驗證</h3>
-        <input type="password" id="login-pass" placeholder="密令">
-        <button class="btn" onclick="processLogin()" style="width:100%; margin-top:10px;">登入</button>
-        <button class="btn" style="width:100%; margin-top:5px; background:#444; color:#fff;" onclick="closeModal('login-modal')">取消</button>
+        <h3>🛡️ 管理員驗證</h3>
+        <input type="password" id="login-pass">
+        <button class="btn" onclick="processLogin()" style="width:100%;">登入</button>
+        <button onclick="closeModal('login-modal')" style="width:100%; margin-top:5px;">取消</button>
     </div></div>
 
     <div id="pass-modal" class="modal"><div class="modal-content">
-        <h3 style="color:var(--text-accent); text-align:center;">🔑 修改管理密令</h3>
-        <input type="password" id="new-pass" placeholder="輸入新密令">
-        <button class="btn" onclick="updatePassword()" style="width:100%; margin-top:10px;">確認變更</button>
-        <button class="btn" style="width:100%; margin-top:5px; background:#444; color:#fff;" onclick="closeModal('pass-modal')">關閉</button>
+        <h3>🔑 修改密令</h3>
+        <input type="password" id="new-pass">
+        <button class="btn" onclick="updatePassword()" style="width:100%;">確認變更</button>
+        <button onclick="closeModal('pass-modal')" style="width:100%; margin-top:5px;">關閉</button>
     </div></div>
 
     <div style="text-align:center; padding:20px; color:#666; font-size:12px;">
-        系統版本：3.8 亞丁雲端版 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span>
+        系統版本：3.8 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span>
     </div>
 </div>
 
 <script>
+    // Firebase 配置 (保持不變)
     const firebaseConfig = {
         apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
         authDomain: "game1-7c85c.firebaseapp.com",
@@ -175,73 +167,57 @@
     const topicsRef = db.ref('topics');
     const configRef = db.ref('config');
 
-    let topicsData = {};
-    let currentTopicId = null;
-    let adminPass = "1qaz@WSX";
+    let topicsData = {}, currentTopicId = null, adminPass = "1qaz@WSX";
+    let scale = 1;
 
     configRef.child('adminPass').on('value', (snap) => { if(snap.val()) adminPass = snap.val(); });
 
-    // --- 圖片邏輯 ---
-    function updatePreview(textareaId, previewId) {
-        const text = document.getElementById(textareaId).value;
-        const preview = document.getElementById(previewId);
-        const imgMatches = text.match(/(data:image\/[a-zA-Z]*;base64,[^\s]+|https?:\/\/[^\s]+\.(?:jpeg|jpg|gif|png|webp|bmp))/gi) || [];
-        preview.innerHTML = imgMatches.length ? '' : '預覽區 (貼上圖片後顯示)';
-        imgMatches.forEach(src => {
-            const img = document.createElement('img'); img.src = src; img.className = 'preview-img'; preview.appendChild(img);
-        });
-    }
-
-    function setupPaste(id) {
-        document.getElementById(id).addEventListener('paste', function(e) {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let item of items) {
-                if (item.kind === 'file') {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        const val = this.value, start = this.selectionStart;
-                        this.value = val.slice(0, start) + "\n" + ev.target.result + "\n" + val.slice(this.selectionEnd);
-                        updatePreview(id, id === 'post-content' ? 'post-preview' : 'reply-preview');
-                    };
-                    reader.readAsDataURL(item.getAsFile());
-                }
-            }
-        });
-    }
-    setupPaste('post-content'); setupPaste('reply-content');
-
+    // --- 燈箱縮放功能 ---
     function openLightbox(src) {
-        document.getElementById('lightbox-img').src = src;
-        document.getElementById('download-btn').onclick = () => {
-            const a = document.createElement('a'); a.href = src; a.download = `L1_IMG_${Date.now()}.png`; a.click();
-        };
-        document.getElementById('image-lightbox').style.display = 'flex';
+        const lb = document.getElementById('image-lightbox');
+        const img = document.getElementById('lightbox-img');
+        img.src = src;
+        scale = 1;
+        img.style.transform = `scale(${scale})`;
+        lb.style.display = 'flex';
     }
+
     function closeLightbox() { document.getElementById('image-lightbox').style.display = 'none'; }
 
-    function formatContent(text) {
-        if (!text) return "";
-        const imgRegex = /(data:image\/[a-zA-Z]*;base64,[^\s]+|https?:\/\/[^\s]+\.(?:jpeg|jpg|gif|png|webp|bmp))/gi;
-        return text.replace(imgRegex, (img) => `<br><img src="${img}" class="post-img" onclick="openLightbox('${img}')"><br>`);
+    // 滾輪縮放邏輯
+    document.getElementById('image-lightbox').addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const img = document.getElementById('lightbox-img');
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        scale = Math.min(Math.max(0.5, scale + delta), 3); // 限制縮放範圍 0.5x ~ 3x
+        img.style.transform = `scale(${scale})`;
+    });
+
+    // --- 內容處理 ---
+    function formatContent(html) {
+        // 將 HTML 字串轉為含有放大功能的內容
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        div.querySelectorAll('img').forEach(img => {
+            img.className = 'post-img';
+            img.onclick = () => openLightbox(img.src);
+        });
+        return div.innerHTML;
     }
 
-    // --- 列表與留言數 ---
-    topicsRef.on('value', (snap) => { topicsData = snap.val() || {}; renderTopics(); if (currentTopicId) viewTopic(currentTopicId); });
+    // --- Firebase 互動 ---
+    topicsRef.on('value', (snap) => { topicsData = snap.val() || {}; renderTopics(); if(currentTopicId) viewTopic(currentTopicId); });
 
     function renderTopics() {
         const list = document.getElementById('topic-list'); list.innerHTML = '';
-        const readList = JSON.parse(localStorage.getItem('readTopics') || '[]');
         Object.keys(topicsData).reverse().forEach(id => {
             const t = topicsData[id];
-            const isUnread = !readList.includes(id);
-            const isRecent = (Date.now() - t.time) < 86400000;
-            const newTag = (isRecent && isUnread) ? `<span class="new-tag">NEW</span>` : '';
             const rCount = t.replies ? Object.keys(t.replies).length : 0;
             const row = document.createElement('tr');
             row.className = 'topic-row';
             row.innerHTML = `
                 <td><input type="checkbox" class="admin-checkbox item-check" value="${id}"></td>
-                <td onclick="viewTopic('${id}')">${newTag}${t.title}</td>
+                <td onclick="viewTopic('${id}')">${t.title}</td>
                 <td onclick="viewTopic('${id}')">${t.name} <span style="font-size:11px; color:#888;">(💬 ${rCount})</span></td>
             `;
             list.appendChild(row);
@@ -249,11 +225,9 @@
     }
 
     function viewTopic(id) {
-        currentTopicId = id; const t = topicsData[id]; if(!t) return;
-        let readList = JSON.parse(localStorage.getItem('readTopics') || '[]');
-        if(!readList.includes(id)) { readList.push(id); localStorage.setItem('readTopics', JSON.stringify(readList)); renderTopics(); }
+        currentTopicId = id; const t = topicsData[id];
         document.getElementById('display-title').innerText = t.title;
-        document.getElementById('display-author').innerText = "筆記者：" + t.name;
+        document.getElementById('display-author').innerText = "作者：" + t.name;
         document.getElementById('display-content').innerHTML = formatContent(t.content);
         const rList = document.getElementById('reply-list'); rList.innerHTML = '';
         if(t.replies) Object.values(t.replies).forEach(r => {
@@ -264,41 +238,37 @@
         showSection('view-page');
     }
 
-    // --- 其他功能 ---
-    function startCooldown(id, text) {
-        const btn = document.getElementById(id); btn.disabled = true; let time = 20;
-        const timer = setInterval(() => { btn.innerText = `⏳ ${time}s`; if (time-- <= 0) { clearInterval(timer); btn.disabled = false; btn.innerText = text; } }, 1000);
-    }
     async function submitPost() {
-        const n = document.getElementById('post-name').value, t = document.getElementById('post-title').value, c = document.getElementById('post-content').value;
-        if(!n || !t || !c) return alert("請填寫完整");
-        topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => { 
-            showSection('home-page'); document.getElementById('post-content').value = ''; updatePreview('post-content', 'post-preview'); startCooldown('post-submit-btn', '✅ 確認發佈'); 
+        const n = document.getElementById('post-name').value, t = document.getElementById('post-title').value, c = document.getElementById('post-editor').innerHTML;
+        if(!n || !t || !c) return alert("請填寫內容");
+        topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => {
+            showSection('home-page'); document.getElementById('post-editor').innerHTML = '';
         });
     }
+
     async function submitReply() {
-        const n = document.getElementById('reply-name').value, c = document.getElementById('reply-content').value;
-        if(!n || !c) return alert("請填寫完整");
-        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => { 
-            document.getElementById('reply-content').value = ''; updatePreview('reply-content', 'reply-preview'); startCooldown('reply-submit-btn', '🏹 送出回覆'); 
+        const n = document.getElementById('reply-name').value, c = document.getElementById('reply-editor').innerHTML;
+        if(!n || !c) return alert("請填寫回覆");
+        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => {
+            document.getElementById('reply-editor').innerHTML = '';
         });
     }
+
+    // --- 基礎 UI 功能 ---
+    function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function toggleSideMenu() { document.getElementById('sideMenuContainer').classList.toggle('hidden'); }
-    function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='home-page') currentTopicId=null; }
-    
     function processLogin() {
         if(document.getElementById('login-pass').value === adminPass) {
             document.getElementById('body-tag').classList.add('admin-mode');
             document.getElementById('batch-del-btn').style.display = 'block';
             closeModal('login-modal');
-        } else alert("密令錯誤");
+        } else alert("錯誤");
     }
-
-    function updatePassword() { const newP = document.getElementById('new-pass').value; if(newP.length < 4) return alert("太短"); configRef.update({ adminPass: newP }).then(() => { alert("已更新"); closeModal('pass-modal'); }); }
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function toggleAll(src) { document.querySelectorAll('.item-check').forEach(cb => cb.checked = src.checked); }
-    function batchDelete() { const sel = document.querySelectorAll('.item-check:checked'); if(sel.length && confirm(`刪除 ${sel.length} 項？`)) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove()); }
+    function batchDelete() { const sel = document.querySelectorAll('.item-check:checked'); if(sel.length && confirm('刪除？')) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove()); }
+    function updatePassword() { const newP = document.getElementById('new-pass').value; configRef.update({ adminPass: newP }).then(() => { alert("已更新"); closeModal('pass-modal'); }); }
 </script>
 </body>
 </html>
