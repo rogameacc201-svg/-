@@ -266,14 +266,37 @@
         });
     }
 
+    // --- 新增：讀取已看過的文章清單 ---
+    function getReadList() {
+        const list = localStorage.getItem('readTopics');
+        return list ? JSON.parse(list) : [];
+    }
+
+    // --- 新增：將文章標記為已讀 ---
+    function markAsRead(id) {
+        let list = getReadList();
+        if (!list.includes(id)) {
+            list.push(id);
+            localStorage.setItem('readTopics', JSON.stringify(list));
+        }
+    }
+
     function renderTopics() {
         const list = document.getElementById('topic-list');
         list.innerHTML = '';
+        const readList = getReadList();
+
         Object.keys(topicsData).reverse().forEach(id => {
             const t = topicsData[id];
             const rCount = t.replies ? Object.keys(t.replies).length : 0;
-            const isNew = (Date.now() - t.time) < (24 * 60 * 60 * 1000);
-            const newTag = isNew ? `<span class="new-tag">NEW</span>` : '';
+            
+            // 判斷是否為 24 小時內發佈
+            const isRecent = (Date.now() - t.time) < (24 * 60 * 60 * 1000);
+            // 判斷是否「未讀過」
+            const isUnread = !readList.includes(id);
+            
+            // 只有「24小時內」且「未讀過」才顯示 NEW
+            const newTag = (isRecent && isUnread) ? `<span class="new-tag">NEW</span>` : '';
 
             const row = document.createElement('tr');
             row.className = 'topic-row';
@@ -324,6 +347,11 @@
         currentTopicId = id;
         const t = topicsData[id];
         if(!t) return;
+
+        // --- 新增：進入主題時標記為已讀並刷新列表狀態 ---
+        markAsRead(id);
+        renderTopics(); 
+
         document.getElementById('display-title').innerText = t.title;
         document.getElementById('display-author').innerText = "筆記者：" + t.name;
         document.getElementById('display-content').innerText = t.content;
