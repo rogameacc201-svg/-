@@ -130,7 +130,7 @@
                 <span style="color:var(--border-color); margin-right:5px;">🔍</span>
                 <input type="text" id="search-input" class="search-input" placeholder="搜索標題或作者..." onkeyup="filterTopics()">
             </div>
-            <button class="btn btn-batch-delete" onclick="batchDelete()" style="background:#a30000; color:#fff; display:none;">🗑️ 批次刪除</button>
+            <button class="btn btn-batch-delete" onclick="batchDelete()" style="background:#a30000; color:#fff; display:none; padding: 8px 15px;">🗑️ 批次刪除</button>
         </div>
         <table class="forum-table">
             <thead>
@@ -173,6 +173,7 @@
     <div id="login-modal" class="modal"><div class="modal-content">
         <input type="password" id="login-pass" placeholder="密令">
         <button class="btn" onclick="processLogin()" style="width:100%; margin-top:10px;">登入</button>
+        <button class="btn" style="width:100%; margin-top:5px; background:#444; color:#fff;" onclick="document.getElementById('login-modal').style.display='none'">取消</button>
     </div></div>
 
     <div style="text-align:center; padding:20px; color:#666; font-size:12px;">
@@ -193,17 +194,17 @@
         }
     })();
 
-    // --- 1. Firebase 配置 (請替換) ---
+    // --- 1. Firebase 配置 ---
     const firebaseConfig = {
-  apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
-  authDomain: "game1-7c85c.firebaseapp.com",
-  databaseURL: "https://game1-7c85c-default-rtdb.firebaseio.com",
-  projectId: "game1-7c85c",
-  storageBucket: "game1-7c85c.firebasestorage.app",
-  messagingSenderId: "1082794968010",
-  appId: "1:1082794968010:web:8276a41c630442b3a88533",
-  measurementId: "G-4P46QECVZX"
-};
+        apiKey: "AIzaSyDfV9VWyrgcomvU6M5kP2Sugr29zoqrlo8",
+        authDomain: "game1-7c85c.firebaseapp.com",
+        databaseURL: "https://game1-7c85c-default-rtdb.firebaseio.com",
+        projectId: "game1-7c85c",
+        storageBucket: "game1-7c85c.firebasestorage.app",
+        messagingSenderId: "1082794968010",
+        appId: "1:1082794968010:web:8276a41c630442b3a88533",
+        measurementId: "G-4P46QECVZX"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -269,6 +270,8 @@
         if(!n || !t || !c) return alert("請填寫完整");
         topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => {
             showSection('home-page');
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-content').value = '';
             startCooldown('post-submit-btn', '✅ 確認發佈');
         });
     }
@@ -320,7 +323,9 @@
     function toggleAll(src) { document.querySelectorAll('.item-check').forEach(cb => cb.checked = src.checked); }
     function batchDelete() {
         const sel = document.querySelectorAll('.item-check:checked');
-        if(sel.length && confirm(`確定刪除 ${sel.length} 項？`)) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove());
+        if(sel.length && confirm(`確定刪除 ${sel.length} 項？`)) {
+            sel.forEach(cb => db.ref(`topics/${cb.value}`).remove());
+        }
     }
 </script>
 </body>
