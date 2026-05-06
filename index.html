@@ -31,9 +31,6 @@
         #display-content a, .reply-box a { color: var(--link-color); text-decoration: underline; cursor: pointer; }
         img { cursor: zoom-in; max-width: 100%; height: auto; display: block; margin: 10px 0; border: 1px solid var(--border-color); }
 
-        .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 10000; overflow: hidden; touch-action: none; }
-        #lightbox-img { position: absolute; max-width: 90%; max-height: 90%; transition: transform 0.1s ease-out; cursor: grab; user-select: none; }
-
         .forum-header { background-color: var(--header-bg); border: 2px solid var(--border-color); padding: 20px; text-align: center; margin-bottom: 20px; }
         .btn { background: var(--gold-gradient); border: 1px solid #000; color: #000; padding: 10px 18px; font-weight: bold; cursor: pointer; }
         .forum-table { width: 100%; border-collapse: collapse; background: rgba(21, 21, 21, 0.9); }
@@ -44,25 +41,22 @@
         .page-section.active { display: block; }
         .reply-box { background: rgba(26, 26, 26, 0.9); border-left: 3px solid var(--border-color); padding: 15px; margin-top: 10px; display: flex; align-items: flex-start; }
         
-        /* 管理員專用顯示控制 */
         .admin-only { display: none; }
         body.admin-mode .admin-only { display: inline-block; }
         .admin-checkbox { transform: scale(1.2); margin-right: 10px; }
 
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; }
+        .rich-editor { width: 100%; min-height: 150px; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; outline: none; }
+        
         .side-menu-container { position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9999; display: flex; align-items: center; transition: transform 0.4s; }
         .side-menu-container.hidden { transform: translateY(-50%) translateX(102px); }
         .side-toggle-btn { background: var(--header-bg); border: 2px solid var(--border-color); border-right: none; color: var(--text-accent); padding: 15px 6px; cursor: pointer; border-radius: 8px 0 0 8px; font-size: 12px; writing-mode: vertical-rl; }
         .side-menu { background: rgba(20, 20, 20, 0.95); border: 2px solid var(--border-color); border-right: none; width: 100px; }
         .side-menu a { display: block; padding: 15px 10px; color: var(--text-accent); text-decoration: none; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(191, 160, 93, 0.2); }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a1a; padding: 25px; border: 2px solid var(--border-color); width: 100%; max-width: 320px; }
-        .rich-editor { width: 100%; min-height: 150px; padding: 12px; background: var(--input-bg); border: 1px solid #555; color: #fff; margin-bottom: 10px; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body id="body-tag">
-
-<div id="image-lightbox" class="lightbox"><img id="lightbox-img" src=""></div>
 
 <div class="side-menu-container" id="sideMenuContainer">
     <div class="side-toggle-btn" onclick="toggleSideMenu()">◀ 快速傳送</div>
@@ -75,7 +69,9 @@
 <div class="container">
     <div class="forum-header">
         <h1>⚔️ 輕鬆玩天堂 - 討論區 ⚔️</h1>
-        <div id="admin-status" class="admin-only" style="color:var(--text-accent); font-weight:bold;">🔱 管理權限已開啟</div>
+        <div id="admin-status" class="admin-only" style="color:var(--text-accent); font-weight:bold;">
+            🔱 管理權限已開啟 | <span onclick="openModal('pw-modal')" style="cursor:pointer; text-decoration: underline;">🔑 修改密碼</span>
+        </div>
     </div>
 
     <!-- 列表頁 -->
@@ -128,11 +124,21 @@
         <button class="btn" onclick="submitPost()" style="width:100%;">✅ 確認發佈</button>
     </div>
 
+    <!-- 登入 Modal -->
     <div id="login-modal" class="modal"><div class="modal-content">
         <h3>🛡️ 管理員驗證</h3>
-        <input type="password" id="login-pass" placeholder="輸入密令" style="width:100%; padding:10px; margin-bottom:10px;">
+        <input type="password" id="login-pass" placeholder="輸入密令" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
         <button class="btn" onclick="processLogin()" style="width:100%;">登入</button>
         <button onclick="closeModal('login-modal')" style="width:100%; margin-top:5px; background:#444; color:#fff; border:none; padding:8px;">取消</button>
+    </div></div>
+
+    <!-- 修改密碼 Modal -->
+    <div id="pw-modal" class="modal"><div class="modal-content">
+        <h3>🔑 修改管理密令</h3>
+        <input type="password" id="new-pass1" placeholder="輸入新密令" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
+        <input type="password" id="new-pass2" placeholder="再次確認密令" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #555; color:#fff;">
+        <button class="btn" onclick="updatePassword()" style="width:100%;">確認修改</button>
+        <button onclick="closeModal('pw-modal')" style="width:100%; margin-top:5px; background:#444; color:#fff; border:none; padding:8px;">關閉</button>
     </div></div>
 
     <div style="text-align:center; padding:20px; color:#666; font-size:12px;">系統版本：3.8 | <span onclick="openModal('login-modal')" style="cursor:pointer;">管理登入</span></div>
@@ -151,24 +157,26 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const topicsRef = db.ref('topics');
+    const configRef = db.ref('config/admin');
 
     let topicsData = {}, currentTopicId = null, adminPass = "1qaz@WSX";
 
-    // --- NEW 標籤管理 ---
+    // 監聽密碼更新
+    configRef.on('value', snap => { if(snap.val()) adminPass = snap.val().password; });
+
+    // --- NEW 標籤與連結功能 ---
     function markAsRead(id) {
         let readList = JSON.parse(localStorage.getItem('read_topics') || '[]');
         if (!readList.includes(id)) { readList.push(id); localStorage.setItem('read_topics', JSON.stringify(readList)); }
     }
     function isRead(id) { return JSON.parse(localStorage.getItem('read_topics') || '[]').includes(id); }
-
-    // --- 連結偵測 ---
     function linkify(text) {
         const urlPattern = /(https?:\/\/[^\s<]+)/g;
         return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" onclick="return confirmLink('${url}')">${url}</a>`);
     }
-    function confirmLink(url) { return confirm("⚠️ 冒險提醒：即將離開討論區前往外部連結？\n\n" + url); }
+    function confirmLink(url) { return confirm("⚠️ 即將前往外部連結？\n\n" + url); }
 
-    // --- 渲染主題列表 ---
+    // --- 渲染列表 ---
     function renderTopics() {
         const list = document.getElementById('topic-list'); list.innerHTML = '';
         Object.keys(topicsData).reverse().forEach(id => {
@@ -177,8 +185,7 @@
             const isWithin24h = (Date.now() - t.time) < (24 * 60 * 60 * 1000);
             const newLabel = (isWithin24h && !isRead(id)) ? `<span class="new-tag">[NEW]</span>` : "";
 
-            const row = document.createElement('tr');
-            row.className = 'topic-row';
+            const row = document.createElement('tr'); row.className = 'topic-row';
             row.innerHTML = `<td><input type="checkbox" class="admin-only admin-checkbox item-check-topic" value="${id}"></td>
                              <td onclick="viewTopic('${id}')">${newLabel}${t.title}</td>
                              <td onclick="viewTopic('${id}')">${t.name} <span style="font-size:11px; color:#888;">(💬 ${rCount})</span></td>`;
@@ -186,72 +193,56 @@
         });
     }
 
-    // --- 渲染主題內容與留言 ---
     function viewTopic(id) {
         markAsRead(id); currentTopicId = id; const t = topicsData[id];
         document.getElementById('display-title').innerText = t.title;
         document.getElementById('display-author').innerText = "筆記者：" + t.name;
         document.getElementById('display-content').innerHTML = linkify(t.content);
-        
         const rList = document.getElementById('reply-list'); rList.innerHTML = '';
-        if(t.replies) {
-            Object.keys(t.replies).forEach(rid => {
-                const r = t.replies[rid];
-                const d = document.createElement('div'); d.className = 'reply-box';
-                d.innerHTML = `
-                    <input type="checkbox" class="admin-only admin-checkbox item-check-reply" value="${rid}">
-                    <div style="flex:1;">
-                        <small style="color:var(--border-color)">${r.name}：</small><br>${linkify(r.content)}
-                    </div>`;
-                rList.appendChild(d);
-            });
-        }
+        if(t.replies) Object.keys(t.replies).forEach(rid => {
+            const r = t.replies[rid];
+            const d = document.createElement('div'); d.className = 'reply-box';
+            d.innerHTML = `<input type="checkbox" class="admin-only admin-checkbox item-check-reply" value="${rid}">
+                           <div style="flex:1;"><small style="color:var(--border-color)">${r.name}：</small><br>${linkify(r.content)}</div>`;
+            rList.appendChild(d);
+        });
         showSection('view-page');
     }
 
-    // --- 批次刪除邏輯 ---
-    function toggleAll(className, src) { document.querySelectorAll('.' + className).forEach(cb => cb.checked = src.checked); }
+    // --- 管理功能 ---
+    function processLogin() { if(document.getElementById('login-pass').value === adminPass) { document.getElementById('body-tag').classList.add('admin-mode'); closeModal('login-modal'); } else alert("密令錯誤"); }
+    
+    function updatePassword() {
+        const p1 = document.getElementById('new-pass1').value, p2 = document.getElementById('new-pass2').value;
+        if(p1 && p1 === p2) {
+            configRef.set({ password: p1 }).then(() => { alert("密令修改成功！"); closeModal('pw-modal'); });
+        } else alert("密令不一致或為空");
+    }
 
+    function toggleAll(className, src) { document.querySelectorAll('.' + className).forEach(cb => cb.checked = src.checked); }
     function batchDeleteTopics() {
         const sel = document.querySelectorAll('.item-check-topic:checked');
-        if(sel.length && confirm(`確定刪除這 ${sel.length} 個主題及其所有留言？`)) {
-            sel.forEach(cb => db.ref(`topics/${cb.value}`).remove());
-            document.getElementById('check-all-topics').checked = false;
-        }
+        if(sel.length && confirm(`確定刪除這 ${sel.length} 個主題？`)) sel.forEach(cb => db.ref(`topics/${cb.value}`).remove());
     }
-
     function batchDeleteReplies() {
         const sel = document.querySelectorAll('.item-check-reply:checked');
-        if(sel.length && confirm(`確定刪除這 ${sel.length} 則留言？`)) {
-            sel.forEach(cb => db.ref(`topics/${currentTopicId}/replies/${cb.value}`).remove());
-        }
+        if(sel.length && confirm(`確定刪除這 ${sel.length} 則留言？`)) sel.forEach(cb => db.ref(`topics/${currentTopicId}/replies/${cb.value}`).remove());
     }
 
-    // --- Firebase 與 介面控制 ---
-    topicsRef.on('value', (snap) => { topicsData = snap.val() || {}; renderTopics(); if(currentTopicId) viewTopic(currentTopicId); });
-
-    async function submitPost() {
+    // --- 基礎邏輯 ---
+    topicsRef.on('value', snap => { topicsData = snap.val() || {}; renderTopics(); if(currentTopicId) viewTopic(currentTopicId); });
+    function submitPost() {
         const n = document.getElementById('post-name').value, t = document.getElementById('post-title').value, c = document.getElementById('post-editor').innerHTML;
-        if(!n || !t || !c.trim()) return alert("請填寫完整內容");
-        topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => { showSection('home-page'); });
+        if(n && t && c.trim()) topicsRef.push({ name: n, title: t, content: c, time: Date.now() }).then(() => showSection('home-page'));
     }
-
-    async function submitReply() {
+    function submitReply() {
         const n = document.getElementById('reply-name').value, c = document.getElementById('reply-editor').innerHTML;
-        if(!n || !c.trim()) return alert("請填寫回覆內容");
-        db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => { document.getElementById('reply-editor').innerHTML = ''; });
+        if(n && c.trim()) db.ref(`topics/${currentTopicId}/replies`).push({ name: n, content: c, time: Date.now() }).then(() => document.getElementById('reply-editor').innerHTML = '');
     }
-
-    function showSection(id) { 
-        document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); 
-        document.getElementById(id).classList.add('active'); 
-        if(id==='home-page') currentTopicId=null;
-        window.scrollTo(0,0); 
-    }
+    function showSection(id) { document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='home-page') currentTopicId=null; window.scrollTo(0,0); }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function toggleSideMenu() { document.getElementById('sideMenuContainer').classList.toggle('hidden'); }
-    function processLogin() { if(document.getElementById('login-pass').value === adminPass) { document.getElementById('body-tag').classList.add('admin-mode'); closeModal('login-modal'); } else alert("密令錯誤"); }
 </script>
 </body>
 </html>
